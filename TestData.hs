@@ -9,9 +9,9 @@ import qualified Chemlambda.Graph as CG
 
 testGraph = 
   [ frin 1 
-  , lam 1 1 3
-  , app 3 4 5 
-  , ter 5
-  , frin 4 ] 
+  , lam 1 2 3
+  , arrow 2 5
+  , arrow 5 4
+  , frout 4 ] 
 
 testView = testGraph !! 1 :& testGraph

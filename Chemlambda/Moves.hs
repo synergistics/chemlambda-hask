@@ -2,22 +2,20 @@
 
 module Chemlambda.Moves where
 
-import Data.Monoid
-
-import qualified Util.Graph as G
-
 import qualified Chemlambda.Graph as CG
 import Chemlambda.Graph hiding (Graph, View, Context) 
-import Util.Graph
 import Chemlambda.Patterns
 import Chemlambda.Node
+import qualified Util.Graph as G
+import Util.Graph
+import Util.Pattern
 
 
 type Move = CG.Graph -> CG.Graph
 
 
 beta :: Move 
-beta (matchOn (nodeOf L <> hasOf ro A) -> Just lamNode@(c G.:& g)) = 
+beta (matchOn (nodeOf L <&&> hasOf ro A) -> Just lamNode@(c G.:& g)) = 
   let
     Just appNode = ro lamNode 
     
@@ -35,7 +33,7 @@ beta g = g -- if no match was found
 
 
 fanIn :: Move
-fanIn (matchOn (nodeOf FI <> hasOf mo FOE) -> Just fiNode@(c G.:& g)) =
+fanIn (matchOn (nodeOf FI <&&> hasOf mo FOE) -> Just fiNode@(c G.:& g)) =
   let
     Just foeNode = mo fiNode 
     
@@ -73,6 +71,32 @@ comb (matchOn (hasOf mo Arrow) -> Just someNode@(c G.:& g)) =
     Just newRef = moRef arrowNode
 
     result = [Context (inEdges c) (node c) [newRef]]
+    newGraph = removeMult [someCtx, arrowCtx] g ++ result
+  in
+    newGraph
+comb (matchOn (hasOf lo Arrow) -> Just someNode@(c G.:& g)) =
+  let
+    Just arrowNode = lo someNode
+
+    someCtx  = ctx someNode
+    arrowCtx = ctx arrowNode
+
+    Just newRef = moRef arrowNode
+
+    result = [Context (inEdges c) (node c) (newRef : [outEdges c !! 1])]
+    newGraph = removeMult [someCtx, arrowCtx] g ++ result
+  in
+    newGraph
+comb (matchOn (hasOf ro Arrow) -> Just someNode@(c G.:& g)) =
+  let
+    Just arrowNode = ro someNode
+
+    someCtx  = ctx someNode
+    arrowCtx = ctx arrowNode
+
+    Just newRef = moRef arrowNode
+
+    result = [Context (inEdges c) (node c) (outEdges c !! 0 : [newRef])]
     newGraph = removeMult [someCtx, arrowCtx] g ++ result
   in
     newGraph

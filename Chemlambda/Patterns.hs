@@ -1,7 +1,6 @@
 module Chemlambda.Patterns where
 
 import Data.List
-import Data.Monoid
 
 import qualified Chemlambda.Graph as C
 import Chemlambda.Graph (mo, mi, lo, li, ro, ri)
