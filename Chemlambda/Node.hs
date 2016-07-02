@@ -15,7 +15,6 @@ data Node
   | T     
   | FRIN  
   | FROUT 
-  -- | Any -- For pattern matching
   deriving ( Show, Read, Eq )
 
 lam :: Int -> Int -> Int -> Context Node Int
