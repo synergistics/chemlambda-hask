@@ -49,17 +49,8 @@ fanIn (matchOn (nodeOf FI <&&> hasOf mo FOE) -> Just fiNode@(c G.:& g)) =
     newGraph 
 fanIn g = g
 
--- comb' :: (View -> Maybe View) -> (View -> Maybe Int) -> Move
--- comb' t tRef (matchOn (hasOf t Arrow) -> Just matchNode@(c G.& g)) =
---   let
---     Just arrowNode = t matchNode
---     Just newRef = moRef arrowNode
 
---     result = [Context [] (node c) []]
---     newGraph = removeMult [matchNode, arrowNode] g ++ result
---   in
---     newGraph
-
+-- Reduce the repetition on this one
 comb :: Move
 comb (matchOn (hasOf mo Arrow) -> Just someNode@(c G.:& g)) =
   let
@@ -100,5 +91,4 @@ comb (matchOn (hasOf ro Arrow) -> Just someNode@(c G.:& g)) =
     newGraph = removeMult [someCtx, arrowCtx] g ++ result
   in
     newGraph
-
-
+comb g = g
