@@ -2,8 +2,6 @@
 
 module Util.Graph where
 
-import qualified Data.List as L
-
 
 data Context n e = Context
   { inEdges :: [e]
@@ -24,8 +22,14 @@ data View n e = (:&)
 toViews :: Graph n e -> [View n e]
 toViews g = map (:& g) g
 
-remove :: (Eq n, Eq e) => Context n e -> Graph n e -> Graph n e 
-remove c g = filter (/= c) g 
+removeCtx :: (Eq n, Eq e) => Context n e -> Graph n e -> Graph n e 
+removeCtx c g = filter (/= c) g 
 
-removeMult :: (Eq n, Eq e) => [Context n e] -> Graph n e -> Graph n e 
-removeMult cs g = filter (\c -> not (elem c cs)) g
+removeCtxs :: (Eq n, Eq e) => [Context n e] -> Graph n e -> Graph n e 
+removeCtxs cs g = filter (\c -> not (elem c cs)) g
+
+-- Maybe rename this
+edges :: (Ord e) => Graph n e -> [e]
+edges g = foldr (\c acc -> (inEdges c) ++ (outEdges c) ++ acc) [] g
+
+
