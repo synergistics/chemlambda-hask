@@ -2,8 +2,10 @@
 
 module Chemlambda.Moves where
 
-import qualified Chemlambda.Graph as CG
-import Chemlambda.Graph hiding (Graph, View, Context) 
+import Data.List
+
+import qualified Chemlambda.Graph as C
+import Chemlambda.Selectors 
 import Chemlambda.Patterns
 import Chemlambda.Node
 import qualified Util.Graph as G
@@ -11,7 +13,7 @@ import Util.Graph
 import Util.Pattern
 
 
-type Move = CG.Graph -> CG.Graph
+type Move = C.Graph -> C.Graph
 
 
 beta :: Move 
@@ -26,7 +28,7 @@ beta (matchOn (nodeOf L <&&> hasOf ro A) -> Just lamNode@(c G.:& g)) =
     Just res2 = arrow <$> (riRef appNode) <*> (loRef lamNode)  
 
     result = [res1, res2] 
-    newGraph = removeMult [lamCtx, appCtx] g ++ result 
+    newGraph = removeCtxs [lamCtx, appCtx] g ++ result 
   in
     newGraph 
 beta g = g -- if no match was found 
@@ -44,7 +46,7 @@ fanIn (matchOn (nodeOf FI <&&> hasOf mo FOE) -> Just fiNode@(c G.:& g)) =
     Just res2 = arrow <$> (riRef fiNode) <*> (loRef foeNode)  
 
     result = [res1, res2] 
-    newGraph = removeMult [fiCtx, foeCtx] g ++ result 
+    newGraph = removeCtxs [fiCtx, foeCtx] g ++ result 
   in
     newGraph 
 fanIn g = g
@@ -62,7 +64,7 @@ comb (matchOn (hasOf mo Arrow) -> Just someNode@(c G.:& g)) =
     Just newRef = moRef arrowNode
 
     result = [Context (inEdges c) (node c) [newRef]]
-    newGraph = removeMult [someCtx, arrowCtx] g ++ result
+    newGraph = removeCtxs [someCtx, arrowCtx] g ++ result
   in
     newGraph
 comb (matchOn (hasOf lo Arrow) -> Just someNode@(c G.:& g)) =
@@ -75,7 +77,7 @@ comb (matchOn (hasOf lo Arrow) -> Just someNode@(c G.:& g)) =
     Just newRef = moRef arrowNode
 
     result = [Context (inEdges c) (node c) (newRef : [outEdges c !! 1])]
-    newGraph = removeMult [someCtx, arrowCtx] g ++ result
+    newGraph = removeCtxs [someCtx, arrowCtx] g ++ result
   in
     newGraph
 comb (matchOn (hasOf ro Arrow) -> Just someNode@(c G.:& g)) =
@@ -88,7 +90,39 @@ comb (matchOn (hasOf ro Arrow) -> Just someNode@(c G.:& g)) =
     Just newRef = moRef arrowNode
 
     result = [Context (inEdges c) (node c) (outEdges c !! 0 : [newRef])]
-    newGraph = removeMult [someCtx, arrowCtx] g ++ result
+    newGraph = removeCtxs [someCtx, arrowCtx] g ++ result
   in
     newGraph
 comb g = g
+
+
+distL (matchOn ((nodeOf L)    <&&> 
+                (hasOf ro FO) <||>
+                (hasOf ro FOE)) -> Just lamNode@(c G.:& g)) = 
+  let
+    unusedEdges = [0..] \\ edges g
+    Just foNode = ro lamNode
+
+    Just edgeA = miRef lamNode 
+    Just edgeB = loRef lamNode
+    Just edgeC = roRef lamNode
+    Just edgeD = loRef foNode
+    Just edgeE = roRef foNode
+    edgeK = unusedEdges !! 0
+    edgeL = unusedEdges !! 1
+    edgeI = unusedEdges !! 2
+    edgeJ = unusedEdges !! 3
+
+
+    lamCtx = ctx lamNode
+    foCtx  = ctx foNode
+    
+    result = [ foe edgeA edgeK edgeL 
+             , lam edgeK edgeI edgeD
+             , lam edgeL edgeJ edgeE
+             , fi  edgeI edgeJ edgeB
+             ]
+    newGraph = removeCtxs [lamCtx, foCtx] g ++ result
+  in
+    newGraph
+distL g = g
