@@ -101,9 +101,13 @@ distL (matchOn ((nodeOf L)    <&&>
                 (hasOf ro FOE)) -> Just lamNode@(c G.:& g)) = 
   let
     unusedEdges = [0..] \\ edges g
+    
     -- FO or FOE
     Just foNode = ro lamNode
 
+    lamCtx = ctx lamNode
+    foCtx  = ctx foNode
+    
     Just edgeA = miRef lamNode 
     Just edgeB = loRef lamNode
     Just edgeC = roRef lamNode
@@ -114,15 +118,12 @@ distL (matchOn ((nodeOf L)    <&&>
     edgeI = unusedEdges !! 2
     edgeJ = unusedEdges !! 3
 
-
-    lamCtx = ctx lamNode
-    foCtx  = ctx foNode
-    
     result = [ foe edgeA edgeK edgeL 
              , lam edgeK edgeI edgeD
              , lam edgeL edgeJ edgeE
              , fi  edgeI edgeJ edgeB
              ]
+
     newGraph = removeCtxs [lamCtx, foCtx] g ++ result
   in
     newGraph
@@ -161,3 +162,179 @@ distA (matchOn ((nodeOf A)    <&&>
     newGraph = removeCtxs [appCtx, foCtx] g ++ result
   in
     newGraph
+
+
+distFI :: Move
+distFI (matchOn ((nodeOf FI) <&&> 
+                 (hasOf mo FO)) -> Just fiNode@(c G.:& g)) = 
+  let
+    unusedEdges = [0..] \\ edges g
+
+    Just foNode = mo fiNode
+
+    fiCtx = ctx fiNode
+    foCtx = ctx foNode
+
+    Just edgeA = liRef fiNode
+    Just edgeB = riRef fiNode
+    Just edgeC = moRef fiNode
+    Just edgeD = loRef foNode
+    Just edgeE = roRef foNode
+    edgeK = unusedEdges !! 0
+    edgeL = unusedEdges !! 1
+    edgeI = unusedEdges !! 2
+    edgeJ = unusedEdges !! 3
+
+    result = [ fo edgeA edgeI edgeJ 
+             , fo edgeB edgeK edgeL
+             , fi edgeI edgeK edgeD
+             , fi edgeJ edgeL edgeE
+             ]
+
+    newGraph = removeCtxs [fiCtx, foCtx] g ++ result
+  in
+    newGraph
+distFI g = g
+
+
+distFO :: Move
+distFO (matchOn ((nodeOf FO) <&&>
+                 (hasOf ro FOE)) -> Just foNode@(c G.:& g)) =
+  let
+    unusedEdges = [0..] \\ edges g
+
+    Just foeNode = ro foNode
+
+    foCtx  = ctx foNode
+    foeCtx = ctx foeNode
+
+    Just edgeA = miRef foNode
+    Just edgeB = loRef foNode
+    Just edgeC = roRef foNode
+    Just edgeD = loRef foeNode
+    Just edgeE = roRef foeNode
+    edgeK = unusedEdges !! 0
+    edgeL = unusedEdges !! 1
+    edgeI = unusedEdges !! 2
+    edgeJ = unusedEdges !! 3
+
+    result = [ fi  edgeI edgeJ edgeB
+             , fo  edgeK edgeI edgeD 
+             , fo  edgeL edgeJ edgeE 
+             , foe edgeA edgeK edgeL 
+             ]
+
+    newGraph = removeCtxs [foCtx, foeCtx] g ++ result
+  in
+    newGraph
+distFO g = g
+
+
+pruneA :: Move
+pruneA (matchOn ((nodeOf A)  <&&> 
+                 (hasOf mo T)) -> Just someNode@(c G.:& g)) = 
+  let
+    Just terNode = mo someNode
+
+    someCtx = ctx someNode
+    terCtx  = ctx terNode 
+    
+    Just edgeA = liRef someNode
+    Just edgeB = riRef someNode
+
+    result = [ ter edgeA
+             , ter edgeB
+             ]
+    
+    newGraph = removeCtxs [someCtx, terCtx] g ++ result
+  in
+    newGraph
+pruneA g = g 
+
+
+pruneFI :: Move
+pruneFI (matchOn ((nodeOf FI) <&&> 
+                 (hasOf mo T)) -> Just someNode@(c G.:& g)) = 
+  let
+    Just terNode = mo someNode
+
+    someCtx = ctx someNode
+    terCtx  = ctx terNode 
+    
+    Just edgeA = liRef someNode
+    Just edgeB = riRef someNode
+
+    result = [ ter edgeA
+             , ter edgeB
+             ]
+    
+    newGraph = removeCtxs [someCtx, terCtx] g ++ result
+  in
+    newGraph
+pruneFI g = g 
+
+
+pruneL :: Move
+pruneL (matchOn ((nodeOf L) <&&>
+                 (hasOf ro T)) -> Just lamNode@(c G.:& g)) = 
+  let
+    Just terNode = ro lamNode
+
+    lamCtx = ctx lamNode
+    terCtx = ctx terNode
+
+    Just edgeA = miRef lamNode
+    Just edgeB = loRef lamNode
+
+    result = [ ter edgeA
+             , frin edgeB
+             ]
+    
+    newGraph = removeCtxs [lamCtx, terCtx] g ++ result
+  in
+    newGraph
+pruneL g = g 
+
+
+-- Prune FO lo matches when the lo is terminated 
+pruneFO_lo :: Move
+pruneFO_lo (matchOn (((nodeOf FO) <||> (nodeOf FOE)) <&&>
+                     (hasOf lo T)) -> Just foNode@(c G.:& g)) = 
+  let
+    Just terNode = lo foNode
+
+    foCtx  = ctx foNode
+    terCtx = ctx terNode
+
+    Just edgeA = miRef foNode
+    Just edgeC = roRef foNode
+
+    result = [ arrow edgeA edgeC ]
+    
+    newGraph = removeCtxs [foCtx, terCtx] g ++ result
+  in
+    newGraph
+pruneFO_lo g = g 
+
+
+pruneFO_ro :: Move
+pruneFO_ro (matchOn (((nodeOf FO) <||> (nodeOf FOE)) <&&>
+                     (hasOf ro T)) -> Just foNode@(c G.:& g)) = 
+  let
+    Just terNode = ro foNode
+
+    foCtx  = ctx foNode
+    terCtx = ctx terNode
+
+    Just edgeA = miRef foNode
+    Just edgeB = loRef foNode
+
+    result = [ arrow edgeA edgeB ]
+    
+    newGraph = removeCtxs [foCtx, terCtx] g ++ result
+  in
+    newGraph
+pruneFO_ro g = g 
+
+
+
