@@ -20,9 +20,14 @@ beta :: Move
 beta (matchOn (nodeOf L <&&> hasOf ro A) -> Just lamNode@(c G.:& g)) = 
   let
     Just appNode = ro lamNode 
-    
+   r 
     lamCtx = ctx lamNode
     appCtx = ctx appNode
+
+    Just edgeA = miRef lamNode
+    Just edgeB = loRef lamNode
+    Just edgeC = roRef lamNode
+    Just edgeD = riRef 
 
     Just res1 = arrow <$> (miRef lamNode) <*> (moRef appNode)
     Just res2 = arrow <$> (riRef appNode) <*> (loRef lamNode)  
