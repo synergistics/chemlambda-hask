@@ -1,4 +1,3 @@
 module Graph where
 
-data Graph a = Graph [a]
-
+newtype Graph a = Graph { graph :: [a] } deriving ( Show, Eq )
