@@ -1,3 +1,6 @@
 module Graph where
 
-newtype Graph a = Graph { graph :: [a] } deriving ( Show, Eq )
+import Atom
+
+
+data Graph a = Graph { graph :: [Atom a] } deriving ( Show, Eq )

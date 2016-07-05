@@ -106,9 +106,9 @@ isFI :: Atom a -> Bool
 isFI (FI _ _ _) = True
 isFI _ = False
 
-isArrow :: Atom a -> Bool
-isArrow (ARROW _ _) = True
-isArrow _ = True
+isARROW :: Atom a -> Bool
+isARROW (ARROW _ _) = True
+isARROW _ = True
 
 isFRIN :: Atom a -> Bool
 isFRIN (FRIN _) = True
