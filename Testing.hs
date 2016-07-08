@@ -3,7 +3,9 @@ module Testing where
 import Atom
 import Graph
 import View
+import Pattern
 
+import SymbolicAtom
 
 g = Graph
   [ frin 1 
