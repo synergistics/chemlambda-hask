@@ -10,4 +10,4 @@ data Atom
   | FRIN
   | FROUT
   | T
-  deriving ( Show, Eq )
+  deriving ( Show, Eq, Ord )
