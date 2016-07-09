@@ -59,3 +59,6 @@ roPort n = L.find isRo $ ports n
 moPort :: Node a -> Maybe (Port a)
 moPort n = L.find isMo $ ports n
 
+
+hasPortId :: (Eq a) => Node a -> a -> Bool
+hasPortId n i = elem i (map portId $ ports n)
