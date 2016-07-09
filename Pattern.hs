@@ -1,39 +1,59 @@
 module Pattern where
 
-import Data.List
-
+import Data.Maybe
+import Port
 import Atom
+import Node
 import Graph
-import View
 
-import SymbolicAtom
+data Pattern a b = Pattern (Graph a -> [b])
 
--- (<&&>) :: Pattern a Bool -> Pattern a Bool -> Pattern a Bool
--- (Pattern p) <&&> (Pattern q) = Pattern ((&&) <$> p <*> q)
+instance Functor (Pattern a) where
+  fmap f p = Pattern $ \g -> map f $ match p g
 
--- (<||>) :: Pattern a Bool -> Pattern a Bool -> Pattern a Bool
--- (Pattern p) <||> (Pattern q) = Pattern ((||) <$> p <*> q)
+instance Applicative (Pattern a) where
+  pure a  = Pattern $ const [a]
+  f <*> p = Pattern $ \g ->
+    do
+      f' <- match f g
+      p' <- match p g
+      return $ f' p'
 
-data Pattern a b = Pattern (View a -> b)
+instance Monad (Pattern a) where
+  return  = pure
+  p >>= f = Pattern $ \g -> concatMap (\m -> match (f m) g) $ match p g
 
-one :: (Eq a) => Pattern a Bool -> Graph a -> Maybe (View a)
-one (Pattern p) g = find p $ views g
+match :: Pattern a b -> Graph a -> [b]
+match (Pattern p) g = p g
 
-many :: (Eq a) => Pattern a Bool -> Graph a -> [(View a)]
-many (Pattern p) g = filter p $ views g 
+atomOf :: Atom -> Pattern a (Node a)
+atomOf a = Pattern $ \g ->
+  filter (\n -> atom n == a) (nodes g)
 
-atom :: SAtom -> Pattern a Bool
-atom sa = Pattern $ \v@(a :& g) -> case sa of
-  L_     -> isL a
-  FO_    -> isFO a
-  FOE_   -> isFOE a
-  A_     -> isA a
-  FI_    -> isFI a
-  ARROW_ -> isARROW a
-  FRIN_  -> isFRIN a
-  FROUT_ -> isFROUT a
-  T_     -> isT a
+conn ::
+  (Eq a, Ord a) =>
+  Atom ->
+  Atom ->
+  PortSel a ->
+  PortSel a ->
+  Pattern a (Node a, Node a)
+conn a b p q = Pattern $ \g ->
+  let
+    pairs = do
+      a' <- match (atomOf a) g
+      b' <- match (atomOf b) g
+      return (a',b')
+  in
+    filter (\(a,b) -> (isProperConn <$> p a <*> q b) == (Just True)) pairs
 
--- Matches on two ports that hav
-conn :: SAtom -> SAtom -> (Atom a -> Maybe a) -> (Atom a -> Maybe a) -> Pattern a 
-conn a b oa ib = 
+connNode n a p q =
+  atomOf a >>= \m -> Pattern $ \g -> if (p n g == Just m) then [(n,m)] else []
+
+-- -- conn ::
+-- --   Atom ->
+-- --   Atom ->
+-- --   (Node a -> Maybe (Port a)) ->
+-- --   (Node a -> Maybe (Port a)) ->
+
+
+-- conn a1 a2 outPort inPort g =
