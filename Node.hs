@@ -41,24 +41,38 @@ t :: a -> Node a
 t a = Node T [Mi a] 
 
 -- Selectors
-liPort :: Node a -> Maybe (Port a)
+type PortSel a = Node a -> Maybe (Port a) 
+
+liPort :: PortSel a
 liPort n = L.find isLi $ ports n 
 
-riPort :: Node a -> Maybe (Port a)
+riPort :: PortSel a
 riPort n = L.find isRi $ ports n
 
-miPort :: Node a -> Maybe (Port a)
+miPort :: PortSel a
 miPort n = L.find isMi $ ports n
 
-loPort :: Node a -> Maybe (Port a)
+loPort :: PortSel a
 loPort n = L.find isLo $ ports n
 
-roPort :: Node a -> Maybe (Port a)
+roPort :: PortSel a
 roPort n = L.find isRo $ ports n
 
-moPort :: Node a -> Maybe (Port a)
+moPort :: PortSel a
 moPort n = L.find isMo $ ports n
 
 
 hasPortId :: (Eq a) => Node a -> a -> Bool
 hasPortId n i = elem i (map portId $ ports n)
+
+
+-- Returns whether two nodes connect
+connects :: Eq a => Node a -> Node a -> Bool
+connects m n = 
+  let
+    possibleConns =
+      do 
+        a <- ports m
+        b <- ports n
+        return (a,b)
+    in any (\(a,b) -> isProperConn a b) possibleConns
