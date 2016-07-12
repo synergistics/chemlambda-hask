@@ -4,7 +4,7 @@ import qualified Data.List as L
 import Atom
 import Port
 
-data Node a = Node 
+data Node a = Node
   { atom  :: Atom
   , ports :: [Port a] }
   deriving ( Ord, Eq )
@@ -32,19 +32,19 @@ arrow :: a -> a -> Node a
 arrow a b = Node ARROW [Mi a, Mo b]
 
 frin :: a -> Node a
-frin a = Node FRIN [Mo a] 
+frin a = Node FRIN [Mo a]
 
 frout :: a -> Node a
 frout a = Node FROUT [Mi a]
 
 t :: a -> Node a
-t a = Node T [Mi a] 
+t a = Node T [Mi a]
 
 -- Selectors
-type PortSel a = Node a -> Maybe (Port a) 
+type PortSel a = Node a -> Maybe (Port a)
 
 liPort :: PortSel a
-liPort n = L.find isLi $ ports n 
+liPort n = L.find isLi $ ports n
 
 riPort :: PortSel a
 riPort n = L.find isRi $ ports n
@@ -67,11 +67,11 @@ hasPortId n i = elem i (map portId $ ports n)
 
 
 -- Returns whether two nodes connect
-connects :: Eq a => Node a -> Node a -> Bool
-connects m n = 
+connects :: (Eq a) => Node a -> Node a -> Bool
+connects m n =
   let
     possibleConns =
-      do 
+      do
         a <- ports m
         b <- ports n
         return (a,b)
