@@ -40,25 +40,26 @@ selectAtPort port node graph =
         L.find (\n -> any (isProperConn p) $ ports n) nodes
   
 
-li :: (Eq a, Ord a) => Node a -> Graph a -> Maybe (Node a)
+type NodeSel a = Node a -> Graph a -> Maybe (Node a)
+
+li :: (Eq a, Ord a) => NodeSel a
 li = selectAtPort liPort
 
-ri :: (Eq a, Ord a) => Node a -> Graph a -> Maybe (Node a)
+ri :: (Eq a, Ord a) => NodeSel a 
 ri = selectAtPort riPort
 
-mi :: (Eq a, Ord a) => Node a -> Graph a -> Maybe (Node a)
+mi :: (Eq a, Ord a) => NodeSel a
 mi = selectAtPort miPort
 
-lo :: (Eq a, Ord a) => Node a -> Graph a -> Maybe (Node a)
+lo :: (Eq a, Ord a) => NodeSel a
 lo = selectAtPort loPort
 
-ro :: (Eq a, Ord a) => Node a -> Graph a -> Maybe (Node a)
+ro :: (Eq a, Ord a) => NodeSel a
 ro = selectAtPort roPort
 
-mo :: (Eq a, Ord a) => Node a -> Graph a -> Maybe (Node a)
+mo :: (Eq a, Ord a) => NodeSel a
 mo = selectAtPort moPort
 
 g = Graph
   [ lam 1 2 3
-  , app 3 4 5
-  ]
+  , app 3 6 7]
