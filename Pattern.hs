@@ -102,5 +102,19 @@ distAPattern = conn (atomOf A) (atomOf FO `Pattern.or` atomOf FOE) [mo] [mi]
 distFIPattern :: (Ord a, Eq a) => ConnPattern a
 distFIPattern = conn (atomOf FI) (atomOf FO) [mo] [mi]
 
-distFIPattern :: (Ord a, Eq a) => ConnPattern a
-distFIPattern = conn (atomOf FO) (atomOf FOE) [ro] [mi]
+distFOPattern :: (Ord a, Eq a) => ConnPattern a
+distFOPattern = conn (atomOf FO) (atomOf FOE) [ro] [mi]
+
+prunePatterns :: (Ord a, Eq a) => ConnPattern a
+prunePatterns = foldl1 Pattern.or patterns
+  where
+    patterns = 
+      [ conn (atomOf A)   (atomOf T) [mo] [mi]
+      , conn (atomOf FI)  (atomOf T) [mo] [mi]
+      , conn (atomOf L)   (atomOf T) [lo] [mi]
+      , conn (atomOf FO)  (atomOf T) [lo] [mi]
+      , conn (atomOf FOE) (atomOf T) [lo] [mi]
+      , conn (atomOf FO)  (atomOf T) [ro] [mi]
+      , conn (atomOf FOE) (atomOf T) [ro] [mi]
+      ]
+
