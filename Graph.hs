@@ -6,30 +6,25 @@ import Atom
 import Node
 
 
-newtype Graph a = Graph { nodes :: [Node a] } deriving ( Show, Eq )
+newtype Graph a = Graph { nodes :: a } deriving ( Show, Eq )
+
+instance Functor Graph where
+  fmap f graph = Graph $ f (nodes graph)
+
+instance Applicative Graph where
+  pure a = Graph a
+  fGraph <*> graph = Graph (nodes fGraph $ nodes graph)
+
+instance Monad Graph where
+  return = pure
+  graph >>= f = f $ nodes graph
 
 
--- mkGraph :: Ord a => [Node a] -> Graph a  
--- mkGraph ns =
---   let
---     getConns n = filter $ \n' -> 
---       let
---         portsN  = ports n 
---         portsN' = ports n'
---       in any (\p -> any (isProperConn p) portsN) portsN' -- Nodes that share a port with n
-
---     mkConn n ns = (n, getConns n ns) 
---     connMap = map (\n -> mkConn n ns) ns
---   in
---     Graph $ M.fromList connMap
-
-conns :: (Eq a) => Node a -> Graph a -> [Node a]
+conns :: (Eq a) => Node a -> Graph [Node a] -> [Node a]
 conns n g = filter (\n' -> connects n n') (nodes g)
   
--- conns n g = M.lookup n (unGraph g)
 
-
-selectAtPort :: (Eq a, Ord a) => (Node a -> Maybe (Port a)) -> Node a -> Graph a -> Maybe (Node a)
+selectAtPort :: (Eq a, Ord a) => (Node a -> Maybe (Port a)) -> Node a -> Graph [Node a] -> Maybe (Node a)
 selectAtPort port node graph = 
   case port node of 
     Nothing -> Nothing
@@ -40,7 +35,7 @@ selectAtPort port node graph =
         L.find (\n -> any (isProperConn p) $ ports n) nodes
   
 
-type NodeSel a = Node a -> Graph a -> Maybe (Node a)
+type NodeSel a = Node a -> Graph [Node a] -> Maybe (Node a)
 
 li :: (Eq a, Ord a) => NodeSel a
 li = selectAtPort liPort
@@ -62,4 +57,11 @@ mo = selectAtPort moPort
 
 g = Graph
   [ lam 1 2 3
-  , app 3 6 7]
+  , arrow 3 4 
+  , t 2
+  , lam 4 1 5
+  , app 5 6 7
+  , lam 8 8 6 
+  , fi 7 9 10
+  , fo 10 11 12
+  ]
