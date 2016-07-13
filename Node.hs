@@ -13,6 +13,7 @@ instance Show a => Show (Node a) where
   show (Node a ps) = "Node " ++ show a ++ " " ++ show ps
 
 -- Constructors
+-- Allow only well formed nodes
 lam :: a -> a -> a -> Node a
 lam a b c = Node L [Mi a, Lo b, Ro c]
 
@@ -40,7 +41,7 @@ frout a = Node FROUT [Mi a]
 t :: a -> Node a
 t a = Node T [Mi a]
 
--- Selectors
+
 type PortSel a = Node a -> Maybe (Port a)
 
 liPort :: PortSel a
@@ -66,7 +67,6 @@ hasPortId :: (Eq a) => Node a -> a -> Bool
 hasPortId n i = elem i (map portId $ ports n)
 
 
--- Returns whether two nodes connect
 connects :: (Eq a) => Node a -> Node a -> Bool
 connects m n =
   let

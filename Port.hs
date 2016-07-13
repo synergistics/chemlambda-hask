@@ -1,5 +1,6 @@
 module Port where
 
+-- A port for a Chemlambda atom 
 data Port a
   = Li { portId :: a }
   | Ri { portId :: a }
@@ -42,7 +43,6 @@ isMo :: Port a -> Bool
 isMo (Mo _) = True
 isMo _      = False
 
--- Return the complementary port to a given one
 complement :: Port a -> Port a
 complement (Li a) = (Lo a)
 complement (Ri a) = (Ro a)
@@ -51,6 +51,5 @@ complement (Lo a) = (Li a)
 complement (Ro a) = (Ri a) 
 complement (Mo a) = (Mi a) 
 
--- If two ports share an ID but have different constructors, its a proper connection
 isProperConn :: Eq a => Port a -> Port a -> Bool
 isProperConn p q = portId p == portId q && p /= q

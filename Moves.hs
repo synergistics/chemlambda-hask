@@ -12,8 +12,8 @@ data NewPort = New Int deriving ( Show )
 type ProposedAddition a = [Node (Either NewPort a)]
 
 
-combMove :: (Eq a) => [Node a] -> ProposedAddition a
-combMove [nodeN, Node ARROW [d,e]] =
+combMove :: (Eq a) => (Node a, Node a) -> ProposedAddition a
+combMove (nodeN, Node ARROW [d,e]) =
   case nodeN of
     (Node L [a,b,c]) -> 
       let
@@ -77,8 +77,8 @@ combMove [nodeN, Node ARROW [d,e]] =
       in 
         [frin e']
 
-betaMove :: [Node a] -> ProposedAddition a
-betaMove [Node L [a,b,c], Node A [d,e,f]] = 
+betaMove :: (Node a, Node a) -> ProposedAddition a
+betaMove (Node L [a,b,c], Node A [d,e,f]) = 
   let
     a' = Right $ portId a
     b' = Right $ portId b
@@ -87,8 +87,8 @@ betaMove [Node L [a,b,c], Node A [d,e,f]] =
   in
     [arrow a' f', arrow e' b'] 
 
-fanInMove :: [Node a] -> ProposedAddition a
-fanInMove [Node FI [a,b,c], Node FOE [d,e,f]] = 
+fanInMove :: (Node a, Node a) -> ProposedAddition a
+fanInMove (Node FI [a,b,c], Node FOE [d,e,f]) = 
   let
     a' = Right $ portId a
     b' = Right $ portId b
@@ -97,8 +97,8 @@ fanInMove [Node FI [a,b,c], Node FOE [d,e,f]] =
   in
     [arrow a' f', arrow b' e'] 
 
-distLMove :: [Node a] -> ProposedAddition a
-distLMove [Node L [a,b,c], outNode] = 
+distLMove :: (Node a, Node a) -> ProposedAddition a
+distLMove (Node L [a,b,c], outNode) = 
   case elem (atom outNode) [FO,FOE] of 
     True -> let
         Node _ [d,e,f] = outNode
@@ -113,8 +113,8 @@ distLMove [Node L [a,b,c], outNode] =
       in
         [fi j i b', lam k i e', lam l j f', foe a' k l] 
 
-distAMove :: [Node a] -> ProposedAddition a
-distAMove [Node A [a,b,c], outNode] = 
+distAMove :: (Node a, Node a) -> ProposedAddition a
+distAMove (Node A [a,b,c], outNode) = 
   case elem (atom outNode) [FO,FOE] of 
     True -> let
         Node _ [d,e,f] = outNode
@@ -129,8 +129,8 @@ distAMove [Node A [a,b,c], outNode] =
       in
         [foe a' i j, foe b' k l, app i k e', app j l f'] 
 
-distFIMove :: [Node a] -> ProposedAddition a
-distFIMove [Node FI [a,b,c], Node FO [d,e,f]] = 
+distFIMove :: (Node a, Node a) -> ProposedAddition a
+distFIMove (Node FI [a,b,c], Node FO [d,e,f]) = 
   let
     a' = Right $ portId a
     b' = Right $ portId b
@@ -143,8 +143,8 @@ distFIMove [Node FI [a,b,c], Node FO [d,e,f]] =
   in
     [fo a' i j, fo b' k l, fi i k e', fi j l f']
     
-distFOMove :: [Node a] -> ProposedAddition a
-distFOMove [Node FO [a,b,c], Node FOE [d,e,f]] = 
+distFOMove :: (Node a, Node a) -> ProposedAddition a
+distFOMove (Node FO [a,b,c], Node FOE [d,e,f]) = 
   let
     a' = Right $ portId a
     b' = Right $ portId b
@@ -157,27 +157,27 @@ distFOMove [Node FO [a,b,c], Node FOE [d,e,f]] =
   in
     [fi j i b', fo k i e', fo l j f', foe a' k l]
 
-pruneMove :: Eq a => [Node a] -> ProposedAddition a
+pruneMove :: Eq a => (Node a, Node a) -> ProposedAddition a
 pruneMove lp = case lp of 
-  [Node A [a,b,c], Node T [d]] ->  
+  (Node A [a,b,c], Node T [d]) ->  
     let
       a' = Right $ portId a
       b' = Right $ portId b
     in [t a', t b']
 
-  [Node FI [a,b,c], Node T [d]] ->  
+  (Node FI [a,b,c], Node T [d]) ->  
     let
       a' = Right $ portId a
       b' = Right $ portId b
     in [t a', t b']
 
-  [Node L [a,b,c], Node T [d]] ->  
+  (Node L [a,b,c], Node T [d]) ->  
     let
       a' = Right $ portId a
       b' = Right $ portId b
     in [t a', frin b']
 
-  [Node FO [a,b,c], Node T [d]] ->  
+  (Node FO [a,b,c], Node T [d]) ->  
     let
       a' = Right $ portId a
       b' = Right $ portId b
@@ -187,7 +187,7 @@ pruneMove lp = case lp of
         then [arrow a' c']
         else [arrow a' b']
 
-  [Node FOE [a,b,c], Node T [d]] ->  
+  (Node FOE [a,b,c], Node T [d]) ->  
     let
       a' = Right $ portId a
       b' = Right $ portId b

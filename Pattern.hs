@@ -6,7 +6,7 @@ import Atom
 import Node
 import Graph
 
-data Pattern a b = Pattern (Graph [Node a] -> [b])
+data Pattern a b = Pattern (Graph a -> [b])
 
 instance Functor (Pattern a) where
   fmap f p = Pattern $ \g -> map f $ match p g
@@ -23,7 +23,7 @@ instance Monad (Pattern a) where
   return  = pure
   p >>= f = Pattern $ \g -> concatMap (\m -> match (f m) g) $ match p g
 
-match :: Pattern a b -> Graph [Node a] -> [b]
+match :: Pattern a b -> Graph a -> [b]
 match (Pattern p) g = p g
 
 -- Matches either pattern
@@ -39,18 +39,22 @@ atomOf :: Atom -> Pattern a (Node a)
 atomOf a = Pattern $ \g ->
   filter (\n -> atom n == a) (nodes g)
 
--- Matches Nodes equivalent to 'n'
+-- Matches Nodes equal to 'n'
 nodeOf :: (Eq a) => Node a -> Pattern a (Node a)
 nodeOf n = Pattern $ \g -> filter (== n) (nodes g)
 
--- Combines two patterns by finding a connection between the nodes they return
+
+type ConnPattern a = Pattern a (Node a, Node a)
+
+-- Combines two patterns on Nodes 
+-- Matches on a connection between the Nodes they return
 conn :: 
   (Eq a) => 
   Pattern a (Node a) -> 
   Pattern a (Node a) -> 
   [NodeSel a] -> 
   [NodeSel a] -> 
-  Pattern a [Node a] 
+  ConnPattern a
 conn patternA patternB portsA portsB = Pattern $ \graph -> 
   let 
     portPairs = do
@@ -77,10 +81,8 @@ conn patternA patternB portsA portsB = Pattern $ \graph ->
       portQ nodeB graph == Just nodeA
   in
     -- Return just the nodes
-    map (\(a,b,p,q) -> [a,b]) $ filter (\(a,b,p,q) -> connects a b p q graph) connGroups
+    map (\(a,b,p,q) -> (a,b)) $ filter (\(a,b,p,q) -> connects a b p q graph) connGroups
 
-
-type ConnPattern a = Pattern a [Node a]
 
 -- Chemlambda Patterns
 betaPattern :: (Ord a, Eq a) => ConnPattern a 

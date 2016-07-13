@@ -1,5 +1,6 @@
 module Atom where
 
+-- A Chemlambda atom
 data Atom
   = L
   | FO
