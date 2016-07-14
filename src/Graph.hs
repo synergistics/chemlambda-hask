@@ -3,6 +3,7 @@
 module Graph where
 
 import qualified Data.List as L
+import Data.List ((\\))
 import Port
 import Atom
 import Node
@@ -56,11 +57,13 @@ unusedPortIds :: forall a. (Eq a, Enum a) => Graph a -> [a]
 unusedPortIds graph = 
   let
     possible = iterate succ (toEnum 0 :: a)
-    unused   = possible L.\\ (concatMap (map portId . ports) $ nodes graph) 
+    unused   = possible \\ (concatMap (map portId . ports) $ nodes graph) 
   in
     unused
 
 g = Graph
   [ lam 1 2 3 
   , app 3 4 5
-  ]
+  , fo  5 11 12
+  , lam 6 7 8
+  , app 8 9 10 ]
