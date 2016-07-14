@@ -9,10 +9,10 @@ import Graph
 
 data NewPort = New Int deriving ( Show )
 
-type ProposedAddition a = [Node (Either NewPort a)]
+type GraphAddition a = Node (Either NewPort a)
 
 
-combMove :: (Eq a) => (Node a, Node a) -> ProposedAddition a
+combMove :: (Eq a) => (Node a, Node a) -> [GraphAddition a]
 combMove (nodeN, Node ARROW [d,e]) =
   case nodeN of
     (Node L [a,b,c]) -> 
@@ -77,7 +77,7 @@ combMove (nodeN, Node ARROW [d,e]) =
       in 
         [frin e']
 
-betaMove :: (Node a, Node a) -> ProposedAddition a
+betaMove :: (Node a, Node a) -> [GraphAddition a]
 betaMove (Node L [a,b,c], Node A [d,e,f]) = 
   let
     a' = Right $ portId a
@@ -87,7 +87,7 @@ betaMove (Node L [a,b,c], Node A [d,e,f]) =
   in
     [arrow a' f', arrow e' b'] 
 
-fanInMove :: (Node a, Node a) -> ProposedAddition a
+fanInMove :: (Node a, Node a) -> [GraphAddition a]
 fanInMove (Node FI [a,b,c], Node FOE [d,e,f]) = 
   let
     a' = Right $ portId a
@@ -97,7 +97,7 @@ fanInMove (Node FI [a,b,c], Node FOE [d,e,f]) =
   in
     [arrow a' f', arrow b' e'] 
 
-distLMove :: (Node a, Node a) -> ProposedAddition a
+distLMove :: (Node a, Node a) -> [GraphAddition a]
 distLMove (Node L [a,b,c], outNode) = 
   case elem (atom outNode) [FO,FOE] of 
     True -> let
@@ -113,7 +113,7 @@ distLMove (Node L [a,b,c], outNode) =
       in
         [fi j i b', lam k i e', lam l j f', foe a' k l] 
 
-distAMove :: (Node a, Node a) -> ProposedAddition a
+distAMove :: (Node a, Node a) -> [GraphAddition a]
 distAMove (Node A [a,b,c], outNode) = 
   case elem (atom outNode) [FO,FOE] of 
     True -> let
@@ -129,7 +129,7 @@ distAMove (Node A [a,b,c], outNode) =
       in
         [foe a' i j, foe b' k l, app i k e', app j l f'] 
 
-distFIMove :: (Node a, Node a) -> ProposedAddition a
+distFIMove :: (Node a, Node a) -> [GraphAddition a]
 distFIMove (Node FI [a,b,c], Node FO [d,e,f]) = 
   let
     a' = Right $ portId a
@@ -143,7 +143,7 @@ distFIMove (Node FI [a,b,c], Node FO [d,e,f]) =
   in
     [fo a' i j, fo b' k l, fi i k e', fi j l f']
     
-distFOMove :: (Node a, Node a) -> ProposedAddition a
+distFOMove :: (Node a, Node a) -> [GraphAddition a]
 distFOMove (Node FO [a,b,c], Node FOE [d,e,f]) = 
   let
     a' = Right $ portId a
@@ -157,7 +157,7 @@ distFOMove (Node FO [a,b,c], Node FOE [d,e,f]) =
   in
     [fi j i b', fo k i e', fo l j f', foe a' k l]
 
-pruneMove :: Eq a => (Node a, Node a) -> ProposedAddition a
+pruneMove :: Eq a => (Node a, Node a) -> [GraphAddition a]
 pruneMove lp = case lp of 
   (Node A [a,b,c], Node T [d]) ->  
     let

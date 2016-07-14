@@ -61,7 +61,6 @@ unusedPortIds graph =
     unused
 
 g = Graph
-  [ lam 1 2 3
+  [ lam 1 2 3 
   , app 3 4 5
-  , fo  5 6 7
   ]

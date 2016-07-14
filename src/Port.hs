@@ -18,6 +18,13 @@ instance Show a => Show (Port a) where
   show (Ro a) = "Ro " ++ (show a)
   show (Mo a) = "Mo " ++ (show a)
 
+instance Functor Port where
+  fmap f (Li a) = Li $ f a
+  fmap f (Ri a) = Ri $ f a
+  fmap f (Mi a) = Mi $ f a
+  fmap f (Lo a) = Lo $ f a
+  fmap f (Ro a) = Ro $ f a
+  fmap f (Mo a) = Mo $ f a
 
 isLi :: Port a -> Bool
 isLi (Li _) = True
