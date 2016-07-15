@@ -59,11 +59,6 @@ unusedPortIds graph =
     possible = iterate succ (toEnum 0 :: a)
     unused   = possible \\ (concatMap (map portId . ports) $ nodes graph) 
   in
-    unused
-
-g = Graph
-  [ lam 1 2 3 
-  , app 3 4 5
-  , fo  5 11 12
-  , lam 6 7 8
-  , app 8 9 10 ]
+    case graph of
+      Graph [] -> possible
+      g        -> possible \\ (concatMap (map portId . ports) $ nodes graph)  
