@@ -6,6 +6,7 @@ import Graph
 import GraphMod
 
 type GraphModPredicate a = GraphMod a -> Bool
+
 reduceGeneral
   :: (Eq a, Enum a)
   => [[PatternMove a]]
@@ -17,7 +18,8 @@ reduceGeneral patternMoveLists pred graph =
     proposedMods = allGraphMods patternMoveLists graph
     acceptedMods = filter pred proposedMods
   in
-    foldr (\mod graph -> applyGraphMod mod graph) graph acceptedMods  
+    foldr applyGraphMod graph acceptedMods  
+
 
 standardPatternMoveList :: Ord a => [[PatternMove a]]
 standardPatternMoveList = 
@@ -28,4 +30,6 @@ standardPatternMoveList =
     , (distFIPattern , distFIMove) ]
 
   , [ (betaPattern   , betaMove)
-    , (fanInPattern  , fanInMove)  ] ]
+    , (fanInPattern  , fanInMove)  ] 
+    
+  , [ (prunePatterns , pruneMove)  ] ]

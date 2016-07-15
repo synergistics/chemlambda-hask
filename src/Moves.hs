@@ -3,8 +3,8 @@ module Moves where
 import Port
 import Atom
 import Node
-import Pattern
 import Graph
+import Pattern
 
 
 data NewPort = New Int deriving ( Show )
@@ -20,6 +20,7 @@ combMove (nodeN, Node ARROW [d,e]) =
         a' = Right $ portId a
         b' = Right $ portId b
         c' = Right $ portId c
+        d' = Right $ portId d
         e' = Right $ portId e
       in 
         if isProperConn b d 

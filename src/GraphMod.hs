@@ -33,7 +33,7 @@ graphMods
   -> [GraphMod a]
 graphMods (pattern, move) graph =  
   let 
-    matches       = match pattern graph
+    matches       = nodesOnce $ match pattern graph
     removedNodes  = map (\(n1,n2) -> [n1, n2]) matches
     addedNodes    = map move matches
     modifications = map (\(r,a) -> GraphMod r a) $ zipWith (,) removedNodes addedNodes
@@ -75,3 +75,22 @@ addToGraph additions graph =
     properAdditions = map toAddableNode additions
   in 
     Graph $ (nodes graph) ++ properAdditions
+
+-- allGraphMods patternMoveLists graph = concat $ snd $ 
+--   foldl 
+--     (\(graph, mods) currentPatternMoves -> 
+--       let
+--         mods' = snd $ foldr 
+--           (\patternMove (graph', mods) -> 
+--             let
+--               mods'' = graphMods patternMove graph'
+--             in
+--               (Graph $ nodes graph' \\ (concatMap removedNodes $ mods''), mods ++ mods'')) 
+--           (graph, [])
+--           currentPatternMoves
+--         -- concatMap (\pm -> graphMods pm graph) currentPatternMoves
+--         nodes' = nodes graph \\ concatMap removedNodes mods'
+--       in
+--         (Graph $ nodes', mods' : mods))
+--    (graph, [])
+--    patternMoveLists 

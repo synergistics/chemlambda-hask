@@ -26,6 +26,20 @@ instance Monad (Pattern a) where
 match :: Pattern a b -> Graph a -> [b]
 match (Pattern p) g = p g
 
+nodesOnce :: Eq a => [(Node a, Node a)] -> [(Node a, Node a)]
+nodesOnce nodes = 
+  let
+    inTuple a (b,c) = a == b || a == c
+    eitherIn (a,b) t = inTuple a t || inTuple b t 
+    nodeIn (a,b) ns = any (\n -> eitherIn n (a,b)) ns 
+  in
+    foldr
+      (\node acc ->
+        if nodeIn node acc
+          then acc
+          else node : acc)
+      []
+      nodes
 -- Matches either pattern
 or :: Pattern a b -> Pattern a b -> Pattern a b
 or patternA patternB = Pattern $ \graph -> match patternA graph ++ match patternB graph
