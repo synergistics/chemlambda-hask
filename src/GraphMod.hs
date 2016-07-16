@@ -1,4 +1,12 @@
-module GraphMod where
+module GraphMod 
+  ( GraphMod(..)
+  , PatternMove
+  , applyGraphMod
+  , graphMods -- rename this please
+  , allGraphMods
+  , addToGraph
+  )
+  where
 
 import qualified Data.List as L
 import Data.List ((\\))
@@ -17,6 +25,7 @@ data GraphMod a = GraphMod
   , addedNodes   :: [GraphAddition a] }
   deriving ( Show )
 
+-- replace this with a tuple with two inner type sigs
 type PatternMove a = (Pattern a (Node a, Node a), (Node a, Node a) -> [GraphAddition a])
 
 applyGraphMod :: (Eq a, Enum a) => GraphMod a -> Graph a -> Graph a
@@ -75,22 +84,3 @@ addToGraph additions graph =
     properAdditions = map toAddableNode additions
   in 
     Graph $ (nodes graph) ++ properAdditions
-
--- allGraphMods patternMoveLists graph = concat $ snd $ 
---   foldl 
---     (\(graph, mods) currentPatternMoves -> 
---       let
---         mods' = snd $ foldr 
---           (\patternMove (graph', mods) -> 
---             let
---               mods'' = graphMods patternMove graph'
---             in
---               (Graph $ nodes graph' \\ (concatMap removedNodes $ mods''), mods ++ mods'')) 
---           (graph, [])
---           currentPatternMoves
---         -- concatMap (\pm -> graphMods pm graph) currentPatternMoves
---         nodes' = nodes graph \\ concatMap removedNodes mods'
---       in
---         (Graph $ nodes', mods' : mods))
---    (graph, [])
---    patternMoveLists 

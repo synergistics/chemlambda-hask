@@ -1,4 +1,9 @@
-module Port where
+module Port 
+  ( Port(..) 
+  , isLi, isRi, isMi, isLo, isRo, isMo
+  , isProperConn
+  )
+  where
 
 -- A port for a Chemlambda atom 
 data Port a

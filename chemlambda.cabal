@@ -18,7 +18,7 @@ cabal-version:       >=1.10
 
 library
   exposed-modules:     Node, Pattern, Graph, Port, Moves, Atom, Reduction, GraphMod
-  other-modules:       Pretty
+  other-modules:       Pretty, Testing
   other-extensions:    ScopedTypeVariables
   build-depends:       base >=4.9 && <4.10, containers >=0.5 && <0.6, pretty-show
   hs-source-dirs:      src

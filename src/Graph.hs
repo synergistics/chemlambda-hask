@@ -1,6 +1,13 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 
-module Graph where
+module Graph 
+  ( li, ri, mi, lo, ro, mo
+  , conns
+  , unusedPortIds
+  , Graph(..) 
+  , NodeSel
+  )
+  where
 
 import qualified Data.List as L
 import Data.List ((\\))

@@ -1,4 +1,6 @@
-module Atom where
+module Atom 
+  ( Atom(..) )
+  where
 
 -- A Chemlambda atom
 data Atom
