@@ -1,4 +1,20 @@
-module Pattern where
+module Pattern 
+  ( Pattern(..)
+  , ConnPattern
+  , match
+  , nodesOnce
+  , anyNode, atomOf, nodeOf
+  , conn
+  , betaPattern
+  , combPattern
+  , fanInPattern
+  , distLPattern
+  , distAPattern
+  , distFIPattern
+  , distFOPattern
+  , prunePatterns 
+  )
+  where
 
 import Data.Maybe
 import Port
@@ -58,6 +74,7 @@ nodeOf :: (Eq a) => Node a -> Pattern a (Node a)
 nodeOf n = Pattern $ \g -> filter (== n) (nodes g)
 
 
+-- A Pattern on the connection between two nodes
 type ConnPattern a = Pattern a (Node a, Node a)
 
 -- Combines two patterns on Nodes 
@@ -66,8 +83,8 @@ conn ::
   (Eq a) => 
   Pattern a (Node a) -> 
   Pattern a (Node a) -> 
-  [NodeSel a] -> 
-  [NodeSel a] -> 
+  [NodeSelector a] -> 
+  [NodeSelector a] -> 
   ConnPattern a
 conn patternA patternB portsA portsB = Pattern $ \graph -> 
   let 
@@ -90,12 +107,12 @@ conn patternA patternB portsA portsB = Pattern $ \graph ->
       return (a,b,p,q)
 
     -- Returns whether portP of nodeA connects to portQ of nodeB
-    connects nodeA nodeB portP portQ graph = 
+    connectsAtPorts nodeA nodeB portP portQ graph = 
       portP nodeA graph == Just nodeB && 
       portQ nodeB graph == Just nodeA
   in
     -- Return just the nodes
-    map (\(a,b,p,q) -> (a,b)) $ filter (\(a,b,p,q) -> connects a b p q graph) connGroups
+    map (\(a,b,p,q) -> (a,b)) $ filter (\(a,b,p,q) -> connectsAtPorts a b p q graph) connGroups
 
 
 -- Chemlambda Patterns
