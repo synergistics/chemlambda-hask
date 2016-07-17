@@ -1,9 +1,11 @@
 module Port 
   ( Port(..) 
   , isLi, isRi, isMi, isLo, isRo, isMo
-  , isProperConn
   )
   where
+
+import Connectable
+
 
 -- A port for a Chemlambda atom 
 data Port a
@@ -31,6 +33,9 @@ instance Functor Port where
   fmap f (Ro a) = Ro $ f a
   fmap f (Mo a) = Mo $ f a
 
+instance Eq a => Connectable (Port a) where
+  connects p q = portId p == portId q && p /= q
+
 isLi :: Port a -> Bool
 isLi (Li _) = True
 isLi _      = False
@@ -56,12 +61,9 @@ isMo (Mo _) = True
 isMo _      = False
 
 complement :: Port a -> Port a
-complement (Li a) = (Lo a)
-complement (Ri a) = (Ro a)
-complement (Mi a) = (Mo a)
-complement (Lo a) = (Li a) 
-complement (Ro a) = (Ri a) 
-complement (Mo a) = (Mi a) 
-
-isProperConn :: Eq a => Port a -> Port a -> Bool
-isProperConn p q = portId p == portId q && p /= q
+complement (Li a) = Lo a
+complement (Ri a) = Ro a
+complement (Mi a) = Mo a
+complement (Lo a) = Li a 
+complement (Ro a) = Ri a 
+complement (Mo a) = Mi a 

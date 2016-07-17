@@ -1,19 +1,38 @@
-module Node where
+module Node 
+  ( Node(..)
+  , lam, fo, foe, app, fi, arrow, frin, frout, t 
+  , liPort, riPort, miPort, loPort, roPort, moPort 
+  , connects
+  ) where
 
 import qualified Data.List as L
+import Connectable
 import Atom
 import Port
 
 data Node a = Node
   { atom  :: Atom
   , ports :: [Port a] }
-  deriving ( Ord, Eq )
+  deriving Eq
 
 instance Show a => Show (Node a) where
   show (Node a ps) = "Node " ++ show a ++ " " ++ show ps
 
--- Constructors
--- Allow only well formed nodes
+instance Eq a => Connectable (Node a) where
+  connects m n = 
+    let
+      possibleConns =
+        do
+          a <- ports m
+          b <- ports n
+          return (a,b)
+    in any (\(a,b) -> a `connects` b) possibleConns
+
+
+hasPortId :: (Eq a) => Node a -> a -> Bool
+hasPortId n i = elem i (map portId $ ports n)
+
+
 lam :: a -> a -> a -> Node a
 lam a b c = Node L [Mi a, Lo b, Ro c]
 
@@ -44,35 +63,23 @@ t a = Node T [Mi a]
 
 type PortSel a = Node a -> Maybe (Port a)
 
+mkPortSel :: (Port a -> Bool) -> PortSel a
+mkPortSel isPort = L.find isPort . ports
+
 liPort :: PortSel a
-liPort n = L.find isLi $ ports n
+liPort = mkPortSel isLi
 
 riPort :: PortSel a
-riPort n = L.find isRi $ ports n
+riPort = mkPortSel isRi
 
 miPort :: PortSel a
-miPort n = L.find isMi $ ports n
+miPort = mkPortSel isMi
 
 loPort :: PortSel a
-loPort n = L.find isLo $ ports n
+loPort = mkPortSel isLo
 
 roPort :: PortSel a
-roPort n = L.find isRo $ ports n
+roPort = mkPortSel isRo
 
 moPort :: PortSel a
-moPort n = L.find isMo $ ports n
-
-
-hasPortId :: (Eq a) => Node a -> a -> Bool
-hasPortId n i = elem i (map portId $ ports n)
-
-
-connects :: (Eq a) => Node a -> Node a -> Bool
-connects m n =
-  let
-    possibleConns =
-      do
-        a <- ports m
-        b <- ports n
-        return (a,b)
-    in any (\(a,b) -> isProperConn a b) possibleConns
+moPort = mkPortSel isMo
