@@ -1,16 +1,17 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 
 module Graph 
-  ( li, ri, mi, lo, ro, mo
-  , conns
+  ( Graph(..) 
+  , NodeSelector
+  , li, ri, mi, lo, ro, mo
+  , connections
   , unusedPortIds
-  , Graph(..) 
-  , NodeSel
   )
   where
 
-import qualified Data.List as L
+import qualified Data.List as List
 import Data.List ((\\))
+import Connectable
 import Port
 import Atom
 import Node
@@ -18,46 +19,42 @@ import Node
 
 newtype Graph a = Graph { nodes :: [Node a] } deriving ( Show, Eq )
 
+connections :: Eq a => Node a -> Graph a -> [Node a]
+connections node graph = filter (connects node) (nodes graph)
 
--- The list of nodes that connect to a node in a graph
-conns :: (Eq a) => Node a -> Graph a -> [Node a]
-conns n g = filter (\n' -> connects n n') (nodes g)
-  
-
--- Generalized Node selector
-type NodeSel a = Node a -> Graph a -> Maybe (Node a)
-
-selectAtPort 
+selectNodeAtPort 
   :: (Eq a, Ord a) 
   => (Node a -> Maybe (Port a)) 
-  -> NodeSel a 
-selectAtPort portSel node graph = 
+  -> NodeSelector a 
+selectNodeAtPort portSel node graph = 
   case portSel node of 
     Nothing -> Nothing
-    Just p  ->
+    Just p ->
       let 
-        nodes = conns node graph
+        connectedNodes = connections node graph
       in 
-        -- Find the nodes that form a connection node at any port
-        L.find (\n -> any (isProperConn p) $ ports n) nodes
+        List.find (\n -> any (connects p) $ ports n) connectedNodes
+
   
-li :: (Eq a, Ord a) => NodeSel a
-li = selectAtPort liPort
+type NodeSelector a = Node a -> Graph a -> Maybe (Node a)
 
-ri :: (Eq a, Ord a) => NodeSel a 
-ri = selectAtPort riPort
+li :: (Eq a, Ord a) => NodeSelector a
+li = selectNodeAtPort liPort
 
-mi :: (Eq a, Ord a) => NodeSel a
-mi = selectAtPort miPort
+ri :: (Eq a, Ord a) => NodeSelector a 
+ri = selectNodeAtPort riPort
 
-lo :: (Eq a, Ord a) => NodeSel a
-lo = selectAtPort loPort
+mi :: (Eq a, Ord a) => NodeSelector a
+mi = selectNodeAtPort miPort
 
-ro :: (Eq a, Ord a) => NodeSel a
-ro = selectAtPort roPort
+lo :: (Eq a, Ord a) => NodeSelector a
+lo = selectNodeAtPort loPort
 
-mo :: (Eq a, Ord a) => NodeSel a
-mo = selectAtPort moPort
+ro :: (Eq a, Ord a) => NodeSelector a
+ro = selectNodeAtPort roPort
+
+mo :: (Eq a, Ord a) => NodeSelector a
+mo = selectNodeAtPort moPort
 
 
 unusedPortIds :: forall a. (Eq a, Enum a) => Graph a -> [a]
