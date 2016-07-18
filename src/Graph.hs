@@ -6,9 +6,7 @@ module Graph
   , li, ri, mi, lo, ro, mo
   , connections
   , unusedPortIds
-  )
-  where
-
+  ) where
 import qualified Data.List as List
 import Data.List ((\\))
 import Connectable

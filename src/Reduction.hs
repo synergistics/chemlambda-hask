@@ -3,22 +3,20 @@ module Reduction where
 import Pattern
 import Moves
 import Graph
-import GraphMod
-
-type GraphModPredicate a = GraphMod a -> Bool
+import GraphModification
 
 reduceGeneral
   :: (Eq a, Enum a)
   => [[PatternMove a]]
-  -> GraphModPredicate a 
+  -> (GraphModification a -> Bool)
   -> Graph a
   -> Graph a
 reduceGeneral patternMoveLists pred graph =
   let
-    proposedMods = allGraphMods patternMoveLists graph
+    proposedMods = allGraphModifications patternMoveLists graph
     acceptedMods = filter pred proposedMods
   in
-    foldr applyGraphMod graph acceptedMods  
+    foldr applyGraphModification graph acceptedMods  
 
 
 standardPatternMoveList :: Ord a => [[PatternMove a]]

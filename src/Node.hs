@@ -4,11 +4,11 @@ module Node
   , liPort, riPort, miPort, loPort, roPort, moPort 
   , connects
   ) where
-
 import qualified Data.List as L
 import Connectable
 import Atom
 import Port
+
 
 data Node a = Node
   { atom  :: Atom

@@ -1,6 +1,5 @@
 {-# LANGUAGE MultiWayIf #-}
 module Moves where
-
 import Port
 import Atom
 import Node

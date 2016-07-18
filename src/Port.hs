@@ -1,9 +1,7 @@
 module Port 
   ( Port(..) 
   , isLi, isRi, isMi, isLo, isRo, isMo
-  )
-  where
-
+  ) where
 import Connectable
 
 

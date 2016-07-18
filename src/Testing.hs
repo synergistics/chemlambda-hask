@@ -6,7 +6,7 @@ import Node
 import Graph
 import Pattern
 import Moves
-import GraphMod
+import GraphModification
 import Reduction
 
 
@@ -20,20 +20,20 @@ reduce2 graph = combCycle $ reduce1 graph
 comb :: (Ord a, Enum a) => Graph a -> Graph a
 comb graph =
   let
-    mods = graphMods (combPattern, combMove) graph
+    mods = graphModifications (combPattern, combMove) graph
   in
-    foldr applyGraphMod graph mods
+    foldr applyGraphModification graph mods
 
 
 combCycle :: (Ord a, Enum a) => Graph a -> Graph a 
 combCycle = combCycle' (Graph [])
   where
     combCycle' :: (Ord a, Enum a) => Graph a -> Graph a -> Graph a 
-    combCycle' (Graph []) current = combCycle' current $ comb current
+    combCycle' (Graph []) current = combCycle' current (comb current)
     combCycle' last current = 
       if last == current
         then current
-        else combCycle' current $ comb current
+        else combCycle' current (comb current)
 
 identity = Graph
   [ lam 1 1 2
