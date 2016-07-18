@@ -12,11 +12,10 @@ data NewPort a = NewId Int | ActualId a deriving ( Show )
 mkActualId :: Port a -> NewPort a
 mkActualId = ActualId . portId
 
-
 type NewNode a = Node (NewPort a)
 
-combMove :: (Eq a) => (Node a, Node a) -> [NewNode a]
-combMove (nodeN, Node ARROW [d,e]) =
+combMove :: (Eq a) => Graph [Node a] -> Graph [NewNode a]
+combMove (Graph [nodeN, Node ARROW [d,e]]) =
   case nodeN of
     (Node L [a,b,c]) -> 
       let
@@ -26,8 +25,8 @@ combMove (nodeN, Node ARROW [d,e]) =
         d' = mkActualId d
         e' = mkActualId e
       in 
-        if | b `connects` d -> [lam a' e' c']
-           | c `connects` d -> [lam a' b' e']
+        if | b `connects` d -> Graph [lam a' e' c']
+           | c `connects` d -> Graph [lam a' b' e']
 
     (Node FO [a,b,c]) -> 
       let
@@ -36,8 +35,8 @@ combMove (nodeN, Node ARROW [d,e]) =
         c' = mkActualId c
         e' = mkActualId e
       in 
-        if | b `connects` d -> [fo a' e' c']
-           | c `connects` d -> [fo a' b' e']
+        if | b `connects` d -> Graph [fo a' e' c']
+           | c `connects` d -> Graph [fo a' b' e']
     
     (Node FOE [a,b,c]) -> 
       let
@@ -46,8 +45,8 @@ combMove (nodeN, Node ARROW [d,e]) =
         c' = mkActualId c
         e' = mkActualId e
       in 
-        if | b `connects` d -> [foe a' e' c']
-           | c `connects` d -> [foe a' b' e']
+        if | b `connects` d -> Graph [foe a' e' c']
+           | c `connects` d -> Graph [foe a' b' e']
     
     (Node A [a,b,_]) ->
       let
@@ -55,7 +54,7 @@ combMove (nodeN, Node ARROW [d,e]) =
         b' = mkActualId b
         e' = mkActualId e
       in 
-        [app a' b' e']
+        Graph [app a' b' e']
     
     (Node FI [a,b,_]) ->
       let
@@ -63,43 +62,43 @@ combMove (nodeN, Node ARROW [d,e]) =
         b' = mkActualId b
         e' = mkActualId e
       in 
-        [fi a' b' e']
+        Graph [fi a' b' e']
     
     (Node ARROW [a,_]) ->
       let
         a' = mkActualId a
         e' = mkActualId e
       in 
-        [arrow a' e']
+        Graph [arrow a' e']
     
     (Node FRIN [_]) ->
       let
         e' = mkActualId e
       in 
-        [frin e']
+        Graph [frin e']
 
-betaMove :: (Node a, Node a) -> [NewNode a]
-betaMove (Node L [a,b,c], Node A [d,e,f]) = 
+betaMove :: Graph [Node a] -> Graph [NewNode a]
+betaMove (Graph [Node L [a,b,c], Node A [d,e,f]]) = 
   let
     a' = mkActualId a
     b' = mkActualId b
     e' = mkActualId e
     f' = mkActualId f
   in
-    [arrow a' f', arrow e' b'] 
+    Graph [arrow a' f', arrow e' b'] 
 
-fanInMove :: (Node a, Node a) -> [NewNode a]
-fanInMove (Node FI [a,b,c], Node FOE [d,e,f]) = 
+fanInMove :: Graph [Node a] -> Graph [NewNode a]
+fanInMove (Graph [Node FI [a,b,c], Node FOE [d,e,f]]) = 
   let
     a' = mkActualId a
     b' = mkActualId b
     e' = mkActualId e
     f' = mkActualId f
   in
-    [arrow a' f', arrow b' e'] 
+    Graph [arrow a' f', arrow b' e'] 
 
-distLMove :: (Node a, Node a) -> [NewNode a]
-distLMove (Node L [a,b,c], outNode) = 
+distLMove :: Graph [Node a] -> Graph [NewNode a]
+distLMove (Graph [Node L [a,b,c], outNode]) = 
   case elem (atom outNode) [FO,FOE] of 
     True -> let
         Node _ [d,e,f] = outNode
@@ -112,10 +111,10 @@ distLMove (Node L [a,b,c], outNode) =
         k  = NewId 2 
         l  = NewId 3 
       in
-        [fi j i b', lam k i e', lam l j f', foe a' k l] 
+        Graph [fi j i b', lam k i e', lam l j f', foe a' k l] 
 
-distAMove :: (Node a, Node a) -> [NewNode a]
-distAMove (Node A [a,b,c], outNode) = 
+distAMove :: Graph [Node a] -> Graph [NewNode a]
+distAMove (Graph [Node A [a,b,c], outNode]) = 
   case elem (atom outNode) [FO,FOE] of 
     True -> let
         Node _ [d,e,f] = outNode
@@ -128,10 +127,10 @@ distAMove (Node A [a,b,c], outNode) =
         k  = NewId 2 
         l  = NewId 3 
       in
-        [foe a' i j, foe b' k l, app i k e', app j l f'] 
+        Graph [foe a' i j, foe b' k l, app i k e', app j l f'] 
 
-distFIMove :: (Node a, Node a) -> [NewNode a]
-distFIMove (Node FI [a,b,c], Node FO [d,e,f]) = 
+distFIMove :: Graph [Node a] -> Graph [NewNode a]
+distFIMove (Graph [Node FI [a,b,c], Node FO [d,e,f]]) = 
   let
     a' = mkActualId a
     b' = mkActualId b
@@ -142,10 +141,10 @@ distFIMove (Node FI [a,b,c], Node FO [d,e,f]) =
     k  = NewId 2 
     l  = NewId 3 
   in
-    [fo a' i j, fo b' k l, fi i k e', fi j l f']
+    Graph [fo a' i j, fo b' k l, fi i k e', fi j l f']
     
-distFOMove :: (Node a, Node a) -> [NewNode a]
-distFOMove (Node FO [a,b,c], Node FOE [d,e,f]) = 
+distFOMove :: Graph [Node a] -> Graph [NewNode a]
+distFOMove (Graph [Node FO [a,b,c], Node FOE [d,e,f]]) = 
   let
     a' = mkActualId a
     b' = mkActualId b
@@ -156,42 +155,42 @@ distFOMove (Node FO [a,b,c], Node FOE [d,e,f]) =
     k  = NewId 2 
     l  = NewId 3 
   in
-    [fi j i b', fo k i e', fo l j f', foe a' k l]
+    Graph [fi j i b', fo k i e', fo l j f', foe a' k l]
 
-pruneMove :: Eq a => (Node a, Node a) -> [NewNode a]
+pruneMove :: Eq a => Graph [Node a] -> Graph [NewNode a]
 pruneMove lp = case lp of 
-  (Node A [a,b,c], Node T [d]) ->  
+  (Graph [Node A [a,b,c], Node T [d]]) ->  
     let
       a' = mkActualId a
       b' = mkActualId b
-    in [t a', t b']
+    in Graph [t a', t b']
 
-  (Node FI [a,b,c], Node T [d]) ->  
+  (Graph [Node FI [a,b,c], Node T [d]]) ->  
     let
       a' = mkActualId a
       b' = mkActualId b
-    in [t a', t b']
+    in Graph [t a', t b']
 
-  (Node L [a,b,c], Node T [d]) ->  
+  (Graph [Node L [a,b,c], Node T [d]]) ->  
     let
       a' = mkActualId a
       b' = mkActualId b
-    in [t a', frin b']
+    in Graph [t a', frin b']
 
-  (Node FO [a,b,c], Node T [d]) ->  
+  (Graph [Node FO [a,b,c], Node T [d]]) ->  
     let
       a' = mkActualId a
       b' = mkActualId b
       c' = mkActualId c
     in 
-      if | b `connects` d -> [arrow a' c']
-         | c `connects` d -> [arrow a' b']
+      if | b `connects` d -> Graph [arrow a' c']
+         | c `connects` d -> Graph [arrow a' b']
 
-  (Node FOE [a,b,c], Node T [d]) ->  
+  (Graph [Node FOE [a,b,c], Node T [d]]) ->  
     let
       a' = mkActualId a
       b' = mkActualId b
       c' = mkActualId c
     in 
-      if | b `connects` d -> [arrow a' c']
-         | c `connects` d -> [arrow a' b']
+      if | b `connects` d -> Graph [arrow a' c']
+         | c `connects` d -> Graph [arrow a' b']
