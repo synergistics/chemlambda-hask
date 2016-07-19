@@ -1,8 +1,10 @@
 module Port 
   ( Port(..) 
+  , NewId(..)
   , isLi, isRi, isMi, isLo, isRo, isMo
   ) where
 import Connectable
+
 
 
 -- A port for a Chemlambda atom 
@@ -14,6 +16,8 @@ data Port a
   | Ro { portId :: a }
   | Mo { portId :: a }
   deriving ( Eq, Ord )
+
+data NewId a = NewId Int | ActualId a deriving ( Show )
 
 instance Show a => Show (Port a) where
   show (Li a) = "Li " ++ (show a)

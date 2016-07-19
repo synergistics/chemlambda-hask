@@ -7,14 +7,11 @@ import Graph
 import Pattern
 
 
-data NewPort a = NewId Int | ActualId a deriving ( Show )
-
-mkActualId :: Port a -> NewPort a
+mkActualId :: Port a -> NewId a
 mkActualId = ActualId . portId
 
-type NewNode a = Node (NewPort a)
 
-combMove :: (Eq a) => Graph [Node a] -> Graph [NewNode a]
+combMove :: (Eq a) => Graph [Node a] -> Graph [Node (NewId a)]
 combMove (Graph [nodeN, Node ARROW [d,e]]) =
   case nodeN of
     (Node L [a,b,c]) -> 
@@ -77,7 +74,7 @@ combMove (Graph [nodeN, Node ARROW [d,e]]) =
       in 
         Graph [frin e']
 
-betaMove :: Graph [Node a] -> Graph [NewNode a]
+betaMove :: Graph [Node a] -> Graph [Node (NewId a)]
 betaMove (Graph [Node L [a,b,c], Node A [d,e,f]]) = 
   let
     a' = mkActualId a
@@ -87,7 +84,7 @@ betaMove (Graph [Node L [a,b,c], Node A [d,e,f]]) =
   in
     Graph [arrow a' f', arrow e' b'] 
 
-fanInMove :: Graph [Node a] -> Graph [NewNode a]
+fanInMove :: Graph [Node a] -> Graph [Node (NewId a)]
 fanInMove (Graph [Node FI [a,b,c], Node FOE [d,e,f]]) = 
   let
     a' = mkActualId a
@@ -97,7 +94,7 @@ fanInMove (Graph [Node FI [a,b,c], Node FOE [d,e,f]]) =
   in
     Graph [arrow a' f', arrow b' e'] 
 
-distLMove :: Graph [Node a] -> Graph [NewNode a]
+distLMove :: Graph [Node a] -> Graph [Node (NewId a)]
 distLMove (Graph [Node L [a,b,c], outNode]) = 
   case elem (atom outNode) [FO,FOE] of 
     True -> let
@@ -113,7 +110,7 @@ distLMove (Graph [Node L [a,b,c], outNode]) =
       in
         Graph [fi j i b', lam k i e', lam l j f', foe a' k l] 
 
-distAMove :: Graph [Node a] -> Graph [NewNode a]
+distAMove :: Graph [Node a] -> Graph [Node (NewId a)]
 distAMove (Graph [Node A [a,b,c], outNode]) = 
   case elem (atom outNode) [FO,FOE] of 
     True -> let
@@ -129,7 +126,7 @@ distAMove (Graph [Node A [a,b,c], outNode]) =
       in
         Graph [foe a' i j, foe b' k l, app i k e', app j l f'] 
 
-distFIMove :: Graph [Node a] -> Graph [NewNode a]
+distFIMove :: Graph [Node a] -> Graph [Node (NewId a)]
 distFIMove (Graph [Node FI [a,b,c], Node FO [d,e,f]]) = 
   let
     a' = mkActualId a
@@ -143,7 +140,7 @@ distFIMove (Graph [Node FI [a,b,c], Node FO [d,e,f]]) =
   in
     Graph [fo a' i j, fo b' k l, fi i k e', fi j l f']
     
-distFOMove :: Graph [Node a] -> Graph [NewNode a]
+distFOMove :: Graph [Node a] -> Graph [Node (NewId a)]
 distFOMove (Graph [Node FO [a,b,c], Node FOE [d,e,f]]) = 
   let
     a' = mkActualId a
@@ -157,7 +154,7 @@ distFOMove (Graph [Node FO [a,b,c], Node FOE [d,e,f]]) =
   in
     Graph [fi j i b', fo k i e', fo l j f', foe a' k l]
 
-pruneMove :: Eq a => Graph [Node a] -> Graph [NewNode a]
+pruneMove :: Eq a => Graph [Node a] -> Graph [Node (NewId a)]
 pruneMove lp = case lp of 
   (Graph [Node A [a,b,c], Node T [d]]) ->  
     let

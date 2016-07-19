@@ -6,41 +6,54 @@ import Node
 import Graph
 import Pattern
 import Moves
-import GraphModification
-import Reduction
+import Reaction
+import RewriteAlgorithms
+-- import GraphModification
+-- import Reduction
 
 
-reduce1 :: (Ord a, Enum a) => Graph a -> Graph a
-reduce1 graph = reduceGeneral standardPatternMoveList (const True) graph
+-- reduce1 :: (Ord a, Enum a) => Graph a -> Graph a
+-- reduce1 graph = reduceGeneral standardPatternMoveList (const True) graph
 
 
-reduce2 :: (Ord a, Enum a) => Graph a -> Graph a
-reduce2 graph = combCycle $ reduce1 graph
+-- reduce2 :: (Ord a, Enum a) => Graph a -> Graph a
+-- reduce2 graph = combCycle $ reduce1 graph
 
-comb :: (Ord a, Enum a) => Graph a -> Graph a
-comb graph =
-  let
-    mods = graphModifications (combPattern, combMove) graph
-  in
-    foldr applyGraphModification graph mods
+-- comb :: (Ord a, Enum a) => Graph a -> Graph a
+-- comb graph =
+--   let
+--     mods = graphModifications (combPattern, combMove) graph
+--   in
+--     foldr applyGraphModification graph mods
 
 
-combCycle :: (Ord a, Enum a) => Graph a -> Graph a 
-combCycle = combCycle' (Graph [])
-  where
-    combCycle' :: (Ord a, Enum a) => Graph a -> Graph a -> Graph a 
-    combCycle' (Graph []) current = combCycle' current (comb current)
-    combCycle' last current = 
-      if last == current
-        then current
-        else combCycle' current (comb current)
+-- combCycle :: (Ord a, Enum a) => Graph a -> Graph a 
+-- combCycle = combCycle' (Graph [])
+--   where
+--     combCycle' :: (Ord a, Enum a) => Graph a -> Graph a -> Graph a 
+--     combCycle' (Graph []) current = combCycle' current (comb current)
+--     combCycle' last current = 
+--       if last == current
+--         then current
+--         else combCycle' current (comb current)
 
-identity = Graph
-  [ lam 1 1 2
-  , lam 4 4 5
-  , app 2 5 9
-  , frout 9
+succNode node = node { ports = map ((+ 15) <$>) $ ports node }
+identity = 
+  ( Graph . concat . take 100 . iterate (map succNode)) 
+  [ lam 4 4 5
+  , app 5 2 9
+  , foe 9 10 11 
   ]
+
+main = putStrLn . show $ rewrite [distAEnzyme] identity
+
+
+d = Graph
+  [ lam 1 2 3 
+  , foe 3 4 5 
+  , lam 6 7 8
+  , foe 8 10 11]
+a = head $ reactionSites distLEnzyme d
 
 omega = Graph
   [ lam 0 1 2
@@ -54,7 +67,7 @@ omega = Graph
   ]
 
 skk = Graph
-  [ fo  3 1 2
+  [ foe 3 1 2
   , lam 5 4 3
   , lam 4 6 5
   , t   6

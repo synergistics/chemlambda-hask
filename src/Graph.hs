@@ -1,4 +1,6 @@
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE BangPatterns #-}
+{-# LANGUAGE FlexibleInstances #-}
 
 module Graph where
   -- ( Graph(..) 
@@ -28,12 +30,45 @@ instance Monad Graph where
   return = pure
   Graph graph >>= f = f graph
 
+instance Monoid (Graph [a]) where
+  mempty = Graph []
+  mappend graphA graphB = (++) <$> graphA <*> graphB
+  
+
+minus :: Eq a => Graph [a] -> Graph [a] -> Graph [a]
+g1 `minus` g2 = (\\) <$> g1 <*> g2
+
+plus :: Eq a => Graph [a] -> Graph [a] -> Graph [a]
+plus = mappend
+
+plusNew 
+  :: (Eq a, Enum a)
+  => Graph [Node a] 
+  -> Graph [Node (NewId a)] 
+  -> Graph [Node a]
+plusNew graph graphNew = 
+  let
+    unusedIds = unusedPortIds graph
+    
+    reifyPort port = fmap go port
+      where
+        go (NewId a)    = unusedIds !! a
+        go (ActualId a) = a
+    
+    reifyNode node = node { ports = map reifyPort (ports node) }
+
+    graph' = map reifyNode <$> graphNew
+  in
+    graph `plus` graph'
+
 
 connections :: (Eq a, Connectable a) => a -> Graph [a] -> [a]
-connections node graph = filter (connects node) (nodes graph)
+connections node graph 
+  | elem node (nodes graph) = filter (connects node) (nodes graph)
+  | otherwise               = []
 
 fromNode :: a -> Graph [a]
-fromNode node = Graph [node]
+fromNode node = return [node]
 
 
 type NodeSelector a = Node a -> Graph [Node a] -> Maybe (Node a)
@@ -74,9 +109,11 @@ unusedPortIds :: forall a. (Eq a, Enum a) => Graph [Node a] -> [a]
 unusedPortIds graph = 
   let
     possible = iterate succ (toEnum 0 :: a)
-    unused   = possible \\ (concatMap (map portId . ports) $ nodes graph) 
+    inUse    = concatMap (map portId . ports) $ nodes graph
+    unused   = filter (\p -> not $ elem p inUse) possible
+    -- unused   = possible \\ inUse
   in
     case graph of
       Graph [] -> possible
-      _        -> unused 
+      _        -> unused
 
