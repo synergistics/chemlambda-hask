@@ -44,17 +44,18 @@ identity =
   , app 5 2 9
   , foe 9 10 11]
 
-standardEnzymes = 
+standardEnzymes :: Eq a => [[Enzyme a]]
+standardEnzymes =
   [ [ distFOEnzyme ]
   , [ distAEnzyme, distLEnzyme, distFIEnzyme ]
   , [ betaEnzyme, fanInEnzyme ]
   , [ pruneEnzyme ]
   ]
 
-c :: [Graph [Node Integer]]
+-- c :: [Graph [Node Integer]]
 c = iterate (rewrite standardEnzymes) omega
 
-main = putStrLn . show $ c
+-- main = putStrLn . show $ c
 
 d = Graph
   [ lam 1 2 3 
@@ -63,6 +64,10 @@ d = Graph
   , foe 8 10 11]
 a = head $ reactionSites distLEnzyme d
 
+test = Graph
+  [ lam 1 2 3
+  , app 3 4 5
+  , t 2]
 omega = Graph
   [ lam 0 1 2
   , fo  1 3 4

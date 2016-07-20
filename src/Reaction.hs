@@ -2,6 +2,7 @@ module Reaction where
 
 -- Test performance differences with reacting automatically versus
 -- going through the intermediate step of ReactionSite
+import Data.List
 import Port
 import Node
 import Graph
@@ -23,6 +24,10 @@ reactionSites enzyme graph =
   let matches = match (pattern enzyme) graph
   in map (\graph -> ReactionSite graph (move enzyme)) matches
 
+reactionSitesMult :: [Enzyme a] -> Graph [Node a] -> [ReactionSite a]
+reactionSitesMult enzymes graph =
+  concatMap (\enzyme -> reactionSites enzyme graph) enzymes
+
 runEnzyme
   :: (Ord a, Enum a)
   => Enzyme a
@@ -31,7 +36,7 @@ runEnzyme
 runEnzyme enzyme graph =
   let
     rs = reactionSites enzyme graph
-  in foldl (flip reactInGraph) graph rs
+  in foldl' (flip reactInGraph) graph rs
 
 runReaction :: ReactionSite a -> Graph [Node (NewId a)]
 runReaction rs = reaction rs $ site rs
