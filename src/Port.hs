@@ -35,6 +35,7 @@ instance Functor Port where
   fmap f (Ro a) = Ro $ f a
   fmap f (Mo a) = Mo $ f a
 
+-- Might need to ensure that one is an in port and one is an out port
 instance Eq a => Connectable (Port a) where
   connects p q = portId p == portId q && p /= q
 

@@ -81,8 +81,8 @@ conn
   :: Eq a
   => Pattern [Node a] (Node a)
   -> Pattern [Node a] (Node a)
-  -> [NodeSelector a]
-  -> [NodeSelector a]
+  -> [PortSel a]
+  -> [PortSel a]
   -> Pattern [Node a] (Graph [Node a])
 conn patternA patternB portsA portsB = Pattern $ \graph ->
   let
@@ -92,8 +92,7 @@ conn patternA patternB portsA portsB = Pattern $ \graph ->
       return (a,b)
 
     connectsAtPorts nodeA nodeB portP portQ graph =
-      portP nodeA graph == Just nodeB &&
-      portQ nodeB graph == Just nodeA
+      (connects <$> portP nodeA <*> portQ nodeB) == (Just True)
 
     matchPairs = do
       node     <- match patternA graph
@@ -111,36 +110,35 @@ conn patternA patternB portsA portsB = Pattern $ \graph ->
 
 -- Chemlambda Patterns
 betaPattern   :: Eq a => Pattern [Node a] (Graph [Node a])
-betaPattern   = conn (atomOf L) (atomOf A) [ro] [li]
+betaPattern   = conn (atomOf L) (atomOf A) [roPort] [liPort]
 
 combPattern   :: Eq a => Pattern [Node a] (Graph [Node a])
-combPattern   = conn anyNode (atomOf ARROW) [lo,ro,mo] [mi]
+combPattern   = conn anyNode (atomOf ARROW) [loPort,roPort,moPort] [miPort]
 
 fanInPattern  :: Eq a => Pattern [Node a] (Graph [Node a])
-fanInPattern  = conn (atomOf FI) (atomOf FOE) [mo] [mi]
+fanInPattern  = conn (atomOf FI) (atomOf FOE) [moPort] [miPort]
 
 distLPattern  :: Eq a => Pattern [Node a] (Graph [Node a])
-distLPattern  = conn (atomOf L) (atomOf FO <|> atomOf FOE) [ro] [mi]
+distLPattern  = conn (atomOf L) (atomOf FO <|> atomOf FOE) [roPort] [miPort]
 
 distAPattern  :: Eq a => Pattern [Node a] (Graph [Node a])
-distAPattern  = conn (atomOf A) (atomOf FO <|> atomOf FOE) [mo] [mi]
+distAPattern  = conn (atomOf A) (atomOf FO <|> atomOf FOE) [moPort] [miPort]
 
 distFIPattern :: Eq a => Pattern [Node a] (Graph [Node a])
-distFIPattern = conn (atomOf FI) (atomOf FO) [mo] [mi]
+distFIPattern = conn (atomOf FI) (atomOf FO) [moPort] [miPort]
 
 distFOPattern :: Eq a => Pattern [Node a] (Graph [Node a])
-distFOPattern = conn (atomOf FO) (atomOf FOE) [ro] [mi]
+distFOPattern = conn (atomOf FO) (atomOf FOE) [roPort] [miPort]
 
 prunePatterns :: Eq a => Pattern [Node a] (Graph [Node a])
 prunePatterns = foldl1 (<|>) patterns
   where
     patterns =
-      [ conn (atomOf A)   (atomOf T) [mo] [mi]
-      , conn (atomOf FI)  (atomOf T) [mo] [mi]
-      , conn (atomOf L)   (atomOf T) [lo] [mi]
-      , conn (atomOf FO)  (atomOf T) [lo] [mi]
-      , conn (atomOf FOE) (atomOf T) [lo] [mi]
-      , conn (atomOf FO)  (atomOf T) [ro] [mi]
-      , conn (atomOf FOE) (atomOf T) [ro] [mi]
+      [ conn (atomOf A)   (atomOf T) [moPort] [miPort]
+      , conn (atomOf FI)  (atomOf T) [moPort] [miPort]
+      , conn (atomOf L)   (atomOf T) [loPort] [miPort]
+      , conn (atomOf FO)  (atomOf T) [loPort] [miPort]
+      , conn (atomOf FOE) (atomOf T) [loPort] [miPort]
+      , conn (atomOf FO)  (atomOf T) [roPort] [miPort]
+      , conn (atomOf FOE) (atomOf T) [roPort] [miPort]
       ]
-

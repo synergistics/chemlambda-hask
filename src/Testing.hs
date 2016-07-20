@@ -39,14 +39,22 @@ import RewriteAlgorithms
 
 succNode node = node { ports = map ((+ 15) <$>) $ ports node }
 identity = 
-  ( Graph . concat . take 100 . iterate (map succNode)) 
+  ( Graph . concat . take 200 . iterate (map succNode)) 
   [ lam 4 4 5
   , app 5 2 9
-  , foe 9 10 11 
+  , foe 9 10 11]
+
+standardEnzymes = 
+  [ [ distFOEnzyme ]
+  , [ distAEnzyme, distLEnzyme, distFIEnzyme ]
+  , [ betaEnzyme, fanInEnzyme ]
+  , [ pruneEnzyme ]
   ]
 
-main = putStrLn . show $ rewrite [distAEnzyme] identity
+c :: [Graph [Node Integer]]
+c = iterate (rewrite standardEnzymes) omega
 
+main = putStrLn . show $ c
 
 d = Graph
   [ lam 1 2 3 

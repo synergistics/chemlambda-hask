@@ -23,6 +23,11 @@ reactionSites enzyme graph =
   let matches = match (pattern enzyme) graph
   in map (\graph -> ReactionSite graph (move enzyme)) matches
 
+runEnzyme
+  :: (Ord a, Enum a)
+  => Enzyme a
+  -> Graph [Node a]
+  -> Graph [Node a]
 runEnzyme enzyme graph =
   let
     rs = reactionSites enzyme graph
@@ -32,7 +37,7 @@ runReaction :: ReactionSite a -> Graph [Node (NewId a)]
 runReaction rs = reaction rs $ site rs
 
 reactInGraph 
-  :: (Eq a, Enum a) 
+  :: (Enum a, Ord a) 
   => ReactionSite a 
   -> Graph [Node a] 
   -> Graph [Node a]

@@ -42,7 +42,7 @@ plus :: Eq a => Graph [a] -> Graph [a] -> Graph [a]
 plus = mappend
 
 plusNew 
-  :: (Eq a, Enum a)
+  :: (Enum a, Ord a)
   => Graph [Node a] 
   -> Graph [Node (NewId a)] 
   -> Graph [Node a]
@@ -105,13 +105,17 @@ mo :: Eq a => NodeSelector a
 mo = selectNodeAtPort moPort
 
 
-unusedPortIds :: forall a. (Eq a, Enum a) => Graph [Node a] -> [a]
+unusedPortIds
+  :: forall a. (Enum a, Ord a)
+  => Graph [Node a]
+  -> [a]
 unusedPortIds graph = 
   let
-    possible = iterate succ (toEnum 0 :: a)
-    inUse    = concatMap (map portId . ports) $ nodes graph
-    unused   = filter (\p -> not $ elem p inUse) possible
-    -- unused   = possible \\ inUse
+    possible  = iterate succ (toEnum 0 :: a)
+    inUse     = concatMap (map portId . ports) $ nodes graph
+    unused    = tail $ iterate succ (maximum inUse)
+    -- unused = filter (\p -> not $ elem p inUse) possible
+    -- unused = possible \\ inUse
   in
     case graph of
       Graph [] -> possible

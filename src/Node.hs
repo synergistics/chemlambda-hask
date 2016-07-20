@@ -1,8 +1,10 @@
 module Node 
   ( Node(..)
+  , PortSel
   , lam, fo, foe, app, fi, arrow, frin, frout, t 
   , liPort, riPort, miPort, loPort, roPort, moPort 
   , connects
+  , hasPortId
   ) where
 import qualified Data.List as L
 import Connectable
