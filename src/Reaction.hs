@@ -24,10 +24,20 @@ reactionSites enzyme graph =
   let matches = match (pattern enzyme) graph
   in map (\graph -> ReactionSite graph (move enzyme)) matches
 
-reactionSitesMult :: [Enzyme a] -> Graph [Node a] -> [ReactionSite a]
-reactionSitesMult enzymes graph =
-  concatMap (\enzyme -> reactionSites enzyme graph) enzymes
 
+
+reactionSitesMult :: Eq a => [Enzyme a] -> Graph [Node a] -> [ReactionSite a]
+reactionSitesMult enzymes graph = snd $ 
+  foldl' 
+    (\(graph, rs) enzyme -> 
+      let
+        rs' = reactionSites enzyme graph
+        sites = map site rs'
+        graph' = foldl' minus graph sites
+      in
+        (graph', rs ++ rs'))
+    (graph, [])
+    enzymes
 runEnzyme
   :: (Ord a, Enum a)
   => Enzyme a

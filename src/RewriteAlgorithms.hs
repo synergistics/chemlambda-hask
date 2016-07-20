@@ -11,8 +11,11 @@ import Reaction
 
 runCombCycle graph = 
   let
-    comb graph = runEnzyme combEnzyme graph
-
+    comb graph = 
+      let a = reactionSites combEnzyme graph
+      in case a of
+        [] -> graph
+        _  -> reactInGraph (head a) graph
     go (Graph []) curr = go curr (comb curr)
     go prev curr = 
       if prev == curr
@@ -27,15 +30,26 @@ getReactionSites graph ess = foldl'
       rs'    = reactionSitesMult es graph
       s      = map site rs'
       graph' = foldl' minus graph s 
-    in (graph', rs' ++ rs))
+    in (graph', rs ++ rs'))
   (graph, [])
   ess
+
+sites graph = map site . snd . getReactionSites graph
+
+
+standardEnzymes :: Eq a => [[Enzyme a]]
+standardEnzymes =
+  [ [ distFOEnzyme ]
+  , [ distAEnzyme, distLEnzyme, distFIEnzyme ]
+  , [ betaEnzyme, fanInEnzyme ]
+  , [ pruneEnzyme ]
+  ]
 
 rewrite 
   :: (Ord a, Enum a)
   => [[Enzyme a]]
   -> Graph [Node a]
-  -> _ 
+  -> Graph [Node a] 
   -- -> Graph [Node a]
 rewrite ess graph = 
   -- let 
@@ -53,7 +67,12 @@ rewrite ess graph =
         graph
         (snd $ getReactionSites graph ess)
   in result
-
+rewriteWithComb
+  :: (Ord a, Enum a)
+  => [[Enzyme a]]
+  -> Graph [Node a]
+  -> Graph [Node a] 
+rewriteWithComb enzymes = runCombCycle . rewrite enzymes 
   -- in map site rs 
     -- result = 
     --   foldl 
