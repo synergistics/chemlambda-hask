@@ -1,4 +1,4 @@
-module Connectable 
+module Chemlambda.Core.Connectable 
   ( Connectable(..) )
   where
 

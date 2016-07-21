@@ -1,4 +1,4 @@
-module Atom 
+module Chemlambda.Core.Atom 
   ( Atom(..) )
   where
 

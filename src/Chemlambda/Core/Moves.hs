@@ -1,16 +1,18 @@
 {-# LANGUAGE MultiWayIf #-}
-module Moves where
-import Port
-import Atom
-import Node
-import Graph
-import Pattern
+module Chemlambda.Core.Moves where
+
+import Chemlambda.Core.Port
+import Chemlambda.Core.Atom
+import Chemlambda.Core.Node
+import Chemlambda.Core.Graph
+import Chemlambda.Core.Pattern
 
 
 mkActualId :: Port a -> NewId a
 mkActualId = ActualId . portId
 
 
+-- Might need to split
 combMove :: (Eq a) => Graph [Node a] -> Graph [Node (NewId a)]
 combMove (Graph [nodeN, Node ARROW [d,e]]) =
   case nodeN of
@@ -154,40 +156,55 @@ distFOMove (Graph [Node FO [a,b,c], Node FOE [d,e,f]]) =
   in
     Graph [fi j i b', fo k i e', fo l j f', foe a' k l]
 
-pruneMove :: Eq a => Graph [Node a] -> Graph [Node (NewId a)]
-pruneMove lp = case lp of 
-  (Graph [Node A [a,b,c], Node T [d]]) ->  
-    let
-      a' = mkActualId a
-      b' = mkActualId b
-    in Graph [t a', t b']
+pruneAMove :: Eq a => Graph [Node a] -> Graph [Node (NewId a)]
+pruneAMove (Graph [Node A [a,b,c], Node T [d]]) =
+  let
+    a' = mkActualId a
+    b' = mkActualId b
+  in Graph [t a', t b']
 
-  (Graph [Node FI [a,b,c], Node T [d]]) ->  
-    let
-      a' = mkActualId a
-      b' = mkActualId b
-    in Graph [t a', t b']
+pruneFIMove :: Eq a => Graph [Node a] -> Graph [Node (NewId a)]
+pruneFIMove (Graph [Node FI [a,b,c], Node T [d]]) =
+  let
+    a' = mkActualId a
+    b' = mkActualId b
+  in Graph [t a', t b']
 
-  (Graph [Node L [a,b,c], Node T [d]]) ->  
-    let
-      a' = mkActualId a
-      b' = mkActualId b
-    in Graph [t a', frin b']
+pruneLMove :: Eq a => Graph [Node a] -> Graph [Node (NewId a)]
+pruneLMove (Graph [Node L [a,b,c], Node T [d]]) =
+  let
+    a' = mkActualId a
+    b' = mkActualId b
+  in Graph [t a', frin b']
 
-  (Graph [Node FO [a,b,c], Node T [d]]) ->  
-    let
-      a' = mkActualId a
-      b' = mkActualId b
-      c' = mkActualId c
-    in 
-      if | b `connects` d -> Graph [arrow a' c']
-         | c `connects` d -> Graph [arrow a' b']
+pruneFObMove :: Eq a => Graph [Node a] -> Graph [Node (NewId a)]
+pruneFObMove (Graph [Node FO [a,b,c], Node T [d]]) =
+  let
+    a' = mkActualId a
+    c' = mkActualId c
+  in 
+    Graph [arrow a' c']
 
-  (Graph [Node FOE [a,b,c], Node T [d]]) ->  
-    let
-      a' = mkActualId a
-      b' = mkActualId b
-      c' = mkActualId c
-    in 
-      if | b `connects` d -> Graph [arrow a' c']
-         | c `connects` d -> Graph [arrow a' b']
+pruneFOEbMove :: Eq a => Graph [Node a] -> Graph [Node (NewId a)]
+pruneFOEbMove (Graph [Node FOE [a,b,c], Node T [d]]) =
+  let
+    a' = mkActualId a
+    c' = mkActualId c
+  in 
+    Graph [arrow a' c']
+
+pruneFOcMove :: Eq a => Graph [Node a] -> Graph [Node (NewId a)]
+pruneFOcMove (Graph [Node FO [a,b,c], Node T [d]]) =
+  let
+    a' = mkActualId a
+    b' = mkActualId b
+  in 
+    Graph [arrow a' b']
+
+pruneFOEcMove :: Eq a => Graph [Node a] -> Graph [Node (NewId a)]
+pruneFOEcMove (Graph [Node FOE [a,b,c], Node T [d]]) =
+  let
+    a' = mkActualId a
+    b' = mkActualId b
+  in 
+    Graph [arrow a' b']

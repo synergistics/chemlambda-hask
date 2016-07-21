@@ -1,4 +1,4 @@
-module Pattern
+module Chemlambda.Core.Pattern
   ( Pattern(..)
   , match
   -- , nodesOnce
@@ -11,16 +11,22 @@ module Pattern
   , distAPattern
   , distFIPattern
   , distFOPattern
-  , prunePatterns
+  , pruneAPattern
+  , pruneFIPattern
+  , pruneLPattern
+  , pruneFObPattern
+  , pruneFOEbPattern
+  , pruneFOcPattern
+  , pruneFOEcPattern
   )
   where
 
 import Control.Applicative
 import Data.Maybe
-import Port
-import Atom
-import Node
-import Graph
+import Chemlambda.Core.Port
+import Chemlambda.Core.Atom
+import Chemlambda.Core.Node
+import Chemlambda.Core.Graph
 
 -- Usually matches a subgraph of a graph
 newtype Pattern a b = Pattern (Graph a -> [b])
@@ -130,15 +136,23 @@ distFIPattern = conn (atomOf FI) (atomOf FO) [moPort] [miPort]
 distFOPattern :: Eq a => Pattern [Node a] (Graph [Node a])
 distFOPattern = conn (atomOf FO) (atomOf FOE) [roPort] [miPort]
 
-prunePatterns :: Eq a => Pattern [Node a] (Graph [Node a])
-prunePatterns = foldl1 (<|>) patterns
-  where
-    patterns =
-      [ conn (atomOf A)   (atomOf T) [moPort] [miPort]
-      , conn (atomOf FI)  (atomOf T) [moPort] [miPort]
-      , conn (atomOf L)   (atomOf T) [loPort] [miPort]
-      , conn (atomOf FO)  (atomOf T) [loPort] [miPort]
-      , conn (atomOf FOE) (atomOf T) [loPort] [miPort]
-      , conn (atomOf FO)  (atomOf T) [roPort] [miPort]
-      , conn (atomOf FOE) (atomOf T) [roPort] [miPort]
-      ]
+pruneAPattern :: Eq a => Pattern [Node a] (Graph [Node a])
+pruneAPattern = conn (atomOf A) (atomOf T) [moPort] [miPort]
+
+pruneFIPattern :: Eq a => Pattern [Node a] (Graph [Node a])
+pruneFIPattern = conn (atomOf FI) (atomOf T) [moPort] [miPort]
+
+pruneLPattern :: Eq a => Pattern [Node a] (Graph [Node a])
+pruneLPattern = conn (atomOf L) (atomOf T) [loPort] [miPort]
+
+pruneFObPattern :: Eq a => Pattern [Node a] (Graph [Node a])
+pruneFObPattern = conn (atomOf FO) (atomOf T) [loPort] [miPort]
+
+pruneFOEbPattern :: Eq a => Pattern [Node a] (Graph [Node a])
+pruneFOEbPattern = conn (atomOf FOE) (atomOf T) [loPort] [miPort]
+
+pruneFOcPattern :: Eq a => Pattern [Node a] (Graph [Node a])
+pruneFOcPattern = conn (atomOf FO) (atomOf T) [roPort] [miPort]
+
+pruneFOEcPattern :: Eq a => Pattern [Node a] (Graph [Node a])
+pruneFOEcPattern = conn (atomOf FOE) (atomOf T) [roPort] [miPort]

@@ -17,17 +17,17 @@ extra-source-files:  ChangeLog.md, README.md
 cabal-version:       >=1.10
 
 library
-  exposed-modules:  Node, 
-                    Pattern, 
-                    Graph, 
-                    Port, 
-                    Moves, 
-                    Atom, 
-                    Reaction, 
-                    Connectable,
-                    RewriteAlgorithms,
-                    Pretty,
-                    Testing
+  exposed-modules:  Chemlambda.Core.Node, 
+                    Chemlambda.Core.Pattern, 
+                    Chemlambda.Core.Graph, 
+                    Chemlambda.Core.Port, 
+                    Chemlambda.Core.Moves, 
+                    Chemlambda.Core.Atom, 
+                    Chemlambda.Core.Reaction, 
+                    Chemlambda.Core.Connectable,
+                    Chemlambda.RewriteAlgorithms,
+                    Chemlambda.Pretty,
+                    Chemlambda.Testing
 
   build-depends:    base >=4.9 && <4.10, containers >=0.5 && <0.6, pretty-show
   hs-source-dirs:   src

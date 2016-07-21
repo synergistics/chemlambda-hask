@@ -1,5 +1,5 @@
 -- Only for ghci
-module Pretty where
+module Chemlambda.Pretty where
 
 import Text.Show.Pretty
 

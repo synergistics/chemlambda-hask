@@ -1,13 +1,13 @@
-module Testing where
+module Chemlambda.Testing where
 
-import Port
-import Atom
-import Node
-import Graph
-import Pattern
-import Moves
-import Reaction
-import RewriteAlgorithms
+import Chemlambda.Core.Port
+import Chemlambda.Core.Atom
+import Chemlambda.Core.Node
+import Chemlambda.Core.Graph
+import Chemlambda.Core.Pattern
+import Chemlambda.Core.Moves
+import Chemlambda.Core.Reaction
+import Chemlambda.RewriteAlgorithms
 -- import GraphModification
 -- import Reduction
 
@@ -39,13 +39,13 @@ import RewriteAlgorithms
 
 succNode node = node { ports = map ((+ 15) <$>) $ ports node }
 identity = 
-  ( Graph . concat . take 1 . iterate (map succNode)) 
+  ( Graph . concat . take 100 . iterate (map succNode)) 
   [ lam 4 4 5
   , app 5 2 9
   , foe 9 10 11]
 
 -- c :: [Graph [Node Integer]]
-c = iterate (rewriteWithComb standardEnzymes) skk
+c = iterate (rewriteWithComb standardEnzymes) identity
 
 correct graph = 
   let 
@@ -54,7 +54,7 @@ correct graph =
   in
     all (\ns -> length ns <= 2) nodesWith
     
-main = putStrLn . show $ c !! 16
+main = putStrLn . show $ c !! 3 
 
 d = Graph
   [ lam 1 2 3 
@@ -66,7 +66,8 @@ a = head $ reactionSites distLEnzyme d
 test = Graph
   [ lam 1 2 3
   , app 3 4 5
-  , t 2]
+  , t 2 ]
+
 omega = Graph
   [ lam 0 1 2
   , fo  1 3 4

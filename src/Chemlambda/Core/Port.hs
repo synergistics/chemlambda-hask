@@ -1,9 +1,9 @@
-module Port 
+module Chemlambda.Core.Port 
   ( Port(..) 
   , NewId(..)
   , isLi, isRi, isMi, isLo, isRo, isMo
   ) where
-import Connectable
+import Chemlambda.Core.Connectable
 
 
 

@@ -1,4 +1,4 @@
-module Node 
+module Chemlambda.Core.Node 
   ( Node(..)
   , PortSel
   , lam, fo, foe, app, fi, arrow, frin, frout, t 
@@ -7,9 +7,9 @@ module Node
   , hasPortId
   ) where
 import qualified Data.List as L
-import Connectable
-import Atom
-import Port
+import Chemlambda.Core.Connectable
+import Chemlambda.Core.Atom
+import Chemlambda.Core.Port
 
 
 data Node a = Node

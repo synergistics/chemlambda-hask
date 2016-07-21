@@ -2,7 +2,7 @@
 {-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE FlexibleInstances #-}
 
-module Graph where
+module Chemlambda.Core.Graph where
   -- ( Graph(..) 
   -- , NodeSelector
   -- , li, ri, mi, lo, ro, mo
@@ -11,10 +11,10 @@ module Graph where
   -- ) where
 import qualified Data.List as List
 import Data.List ((\\))
-import Connectable
-import Port
-import Atom
-import Node
+import Chemlambda.Core.Connectable
+import Chemlambda.Core.Port
+import Chemlambda.Core.Atom
+import Chemlambda.Core.Node
 
 
 newtype Graph a = Graph { nodes :: a } deriving ( Show, Eq )

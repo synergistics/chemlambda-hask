@@ -1,13 +1,13 @@
 {-# LANGUAGE PartialTypeSignatures #-}
-module RewriteAlgorithms where
+module Chemlambda.RewriteAlgorithms where
 
 import Data.List
-import Port
-import Node
-import Graph
-import Pattern
-import Moves
-import Reaction
+import Chemlambda.Core.Port
+import Chemlambda.Core.Node
+import Chemlambda.Core.Graph
+import Chemlambda.Core.Pattern
+import Chemlambda.Core.Moves
+import Chemlambda.Core.Reaction
 
 runCombCycle graph = 
   let
@@ -42,7 +42,9 @@ standardEnzymes =
   [ [ distFOEnzyme ]
   , [ distAEnzyme, distLEnzyme, distFIEnzyme ]
   , [ betaEnzyme, fanInEnzyme ]
-  , [ pruneEnzyme ]
+  , [ pruneAEnzyme, pruneLEnzyme, pruneFIEnzyme ]
+  , [ pruneFObEnzyme, pruneFOEbEnzyme ]
+  , [ pruneFOcEnzyme, pruneFOEcEnzyme ]
   ]
 
 rewrite 
@@ -58,7 +60,6 @@ rewrite ess graph =
   --              graph
   --              (concat ess)
   -- in runCombCycle result
-
   let 
     result = 
       foldl
@@ -66,7 +67,8 @@ rewrite ess graph =
           reactInGraph r graph)
         graph
         (snd $ getReactionSites graph ess)
-  in result
+  in runCombCycle result
+
 rewriteWithComb
   :: (Ord a, Enum a)
   => [[Enzyme a]]
