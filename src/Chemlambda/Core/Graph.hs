@@ -2,13 +2,18 @@
 {-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE FlexibleInstances #-}
 
-module Chemlambda.Core.Graph where
-  -- ( Graph(..) 
-  -- , NodeSelector
-  -- , li, ri, mi, lo, ro, mo
-  -- , connections
-  -- , unusedPortIds
-  -- ) where
+module Chemlambda.Core.Graph
+  ( Graph(..) 
+  , NodeSelector
+  , li, ri, mi, lo, ro, mo
+  , connections
+  , minus
+  , plus
+  , plusNew
+  , unusedPortIds
+  )
+  where
+
 import qualified Data.List as List
 import Data.List ((\\))
 import Chemlambda.Core.Connectable

@@ -2,6 +2,7 @@ module Chemlambda.Core.Port
   ( Port(..) 
   , NewId(..)
   , isLi, isRi, isMi, isLo, isRo, isMo
+  , mkActualId
   ) where
 import Chemlambda.Core.Connectable
 
@@ -16,8 +17,6 @@ data Port a
   | Ro { portId :: a }
   | Mo { portId :: a }
   deriving ( Eq, Ord )
-
-data NewId a = NewId Int | ActualId a deriving ( Show )
 
 instance Show a => Show (Port a) where
   show (Li a) = "Li " ++ (show a)
@@ -38,6 +37,13 @@ instance Functor Port where
 -- Might need to ensure that one is an in port and one is an out port
 instance Eq a => Connectable (Port a) where
   connects p q = portId p == portId q && p /= q
+
+
+data NewId a = NewId Int | ActualId a deriving ( Show )
+
+mkActualId :: Port a -> NewId a
+mkActualId = ActualId . portId
+
 
 isLi :: Port a -> Bool
 isLi (Li _) = True

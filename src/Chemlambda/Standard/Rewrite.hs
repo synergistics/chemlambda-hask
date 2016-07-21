@@ -1,8 +1,7 @@
 module Chemlambda.Standard.Rewrite 
   ( rewrite 
-  , getReactionSites
+  , priorityBasedReactionSites
   , runCombCycle -- remove this later
-  , sites -- this too
   )
   where
 
@@ -29,7 +28,8 @@ runCombCycle graph =
   in
     go (Graph []) graph
 
-getReactionSites graph ess = foldl'
+priorityBasedReactionSites :: Eq a => Graph [Node a] -> [[Enzyme a]] -> [ReactionSite a]
+priorityBasedReactionSites graph ess = snd $ foldl'
   (\(graph, rs) es ->
     let
       rs'    = reactionSitesMult es graph
@@ -39,12 +39,9 @@ getReactionSites graph ess = foldl'
   (graph, [])
   ess
 
-sites graph = map site . snd . getReactionSites graph
+-- sites graph = map site . priorityBasedReactionSites graph
 
-rewrite 
-  :: (Ord a, Enum a)
-  => Graph [Node a]
-  -> Graph [Node a] 
+rewrite :: (Ord a, Enum a) => Graph [Node a] -> Graph [Node a] 
 rewrite graph =
   let 
     result = 
@@ -52,7 +49,7 @@ rewrite graph =
         (\graph r -> 
           reactInGraph r graph)
         graph
-        (snd $ getReactionSites graph standardEnzymes)
+        (priorityBasedReactionSites graph standardEnzymes)
   in runCombCycle result
   -- let 
   --   result = foldl
