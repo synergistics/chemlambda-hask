@@ -1,5 +1,6 @@
 module Chemlambda.Standard.Rewrite 
   ( rewrite 
+  , rewriteCycle
   , priorityBasedReactionSites
   , runCombCycle -- remove this later
   )
@@ -13,6 +14,8 @@ import Chemlambda.Core.Pattern
 import Chemlambda.Core.Reaction
 import Chemlambda.Standard.Enzymes
 
+
+runCombCycle :: (Enum a, Ord a) => Graph [Node a] -> Graph [Node a]
 runCombCycle graph = 
   let
     comb graph = 
@@ -20,6 +23,7 @@ runCombCycle graph =
       in case a of
         [] -> graph
         _  -> reactInGraph (head a) graph
+
     go (Graph []) curr = go curr (comb curr)
     go prev curr = 
       if prev == curr
@@ -39,8 +43,6 @@ priorityBasedReactionSites graph ess = snd $ foldl'
   (graph, [])
   ess
 
--- sites graph = map site . priorityBasedReactionSites graph
-
 rewrite :: (Ord a, Enum a) => Graph [Node a] -> Graph [Node a] 
 rewrite graph =
   let 
@@ -51,6 +53,8 @@ rewrite graph =
         graph
         (priorityBasedReactionSites graph standardEnzymes)
   in runCombCycle result
+
+rewriteCycle times graph = iterate rewrite graph !! times
   -- let 
   --   result = foldl
   --              (\graph' e -> runEnzyme e graph')

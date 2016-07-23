@@ -22,7 +22,6 @@ import Chemlambda.Core.Port
 import Chemlambda.Core.Atom
 import Chemlambda.Core.Node
 import Chemlambda.Core.Graph
-import Chemlambda.Core.Pattern
 
   
 -- Might need to split
@@ -34,7 +33,6 @@ combMove (Graph [nodeN, Node ARROW [d,e]]) =
         a' = mkActualId a
         b' = mkActualId b
         c' = mkActualId c
-        d' = mkActualId d
         e' = mkActualId e
       in 
         if | b `connects` d -> Graph [lam a' e' c']
@@ -169,28 +167,28 @@ distFOMove (Graph [Node FO [a,b,c], Node FOE [d,e,f]]) =
   in
     Graph [fi j i b', fo k i e', fo l j f', foe a' k l]
 
-pruneAMove :: Eq a => Graph [Node a] -> Graph [Node (NewId a)]
+pruneAMove :: Graph [Node a] -> Graph [Node (NewId a)]
 pruneAMove (Graph [Node A [a,b,c], Node T [d]]) =
   let
     a' = mkActualId a
     b' = mkActualId b
   in Graph [t a', t b']
 
-pruneFIMove :: Eq a => Graph [Node a] -> Graph [Node (NewId a)]
+pruneFIMove :: Graph [Node a] -> Graph [Node (NewId a)]
 pruneFIMove (Graph [Node FI [a,b,c], Node T [d]]) =
   let
     a' = mkActualId a
     b' = mkActualId b
   in Graph [t a', t b']
 
-pruneLMove :: Eq a => Graph [Node a] -> Graph [Node (NewId a)]
+pruneLMove :: Graph [Node a] -> Graph [Node (NewId a)]
 pruneLMove (Graph [Node L [a,b,c], Node T [d]]) =
   let
     a' = mkActualId a
     b' = mkActualId b
   in Graph [t a', frin b']
 
-pruneFObMove :: Eq a => Graph [Node a] -> Graph [Node (NewId a)]
+pruneFObMove :: Graph [Node a] -> Graph [Node (NewId a)]
 pruneFObMove (Graph [Node FO [a,b,c], Node T [d]]) =
   let
     a' = mkActualId a
@@ -198,7 +196,7 @@ pruneFObMove (Graph [Node FO [a,b,c], Node T [d]]) =
   in 
     Graph [arrow a' c']
 
-pruneFOEbMove :: Eq a => Graph [Node a] -> Graph [Node (NewId a)]
+pruneFOEbMove :: Graph [Node a] -> Graph [Node (NewId a)]
 pruneFOEbMove (Graph [Node FOE [a,b,c], Node T [d]]) =
   let
     a' = mkActualId a
@@ -206,7 +204,7 @@ pruneFOEbMove (Graph [Node FOE [a,b,c], Node T [d]]) =
   in 
     Graph [arrow a' c']
 
-pruneFOcMove :: Eq a => Graph [Node a] -> Graph [Node (NewId a)]
+pruneFOcMove :: Graph [Node a] -> Graph [Node (NewId a)]
 pruneFOcMove (Graph [Node FO [a,b,c], Node T [d]]) =
   let
     a' = mkActualId a
@@ -214,7 +212,7 @@ pruneFOcMove (Graph [Node FO [a,b,c], Node T [d]]) =
   in 
     Graph [arrow a' b']
 
-pruneFOEcMove :: Eq a => Graph [Node a] -> Graph [Node (NewId a)]
+pruneFOEcMove :: Graph [Node a] -> Graph [Node (NewId a)]
 pruneFOEcMove (Graph [Node FOE [a,b,c], Node T [d]]) =
   let
     a' = mkActualId a

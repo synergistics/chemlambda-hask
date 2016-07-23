@@ -14,7 +14,7 @@ module Chemlambda.Core.Graph
   )
   where
 
-import qualified Data.List as List
+import qualified Data.List as L
 import Data.List ((\\))
 import Chemlambda.Core.Connectable
 import Chemlambda.Core.Port
@@ -89,7 +89,7 @@ selectNodeAtPort portSel node graph =
       let 
         conns = connections node graph
       in 
-        List.find (\n -> any (connects port) $ ports n) conns 
+        L.find (\n -> any (connects port) $ ports n) conns 
 
 li :: Eq a => NodeSelector a
 li = selectNodeAtPort liPort

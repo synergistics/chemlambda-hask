@@ -5,7 +5,9 @@ module Chemlambda.Core.Node
   , liPort, riPort, miPort, loPort, roPort, moPort 
   , connects
   , hasPortId
-  ) where
+  )
+  where
+
 import qualified Data.List as L
 import Chemlambda.Core.Connectable
 import Chemlambda.Core.Atom

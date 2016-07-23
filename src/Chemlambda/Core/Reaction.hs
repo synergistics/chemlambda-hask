@@ -20,7 +20,6 @@ data ReactionSite a = ReactionSite
 runReaction :: ReactionSite a -> Graph [Node (NewId a)]
 runReaction rs = reaction rs $ site rs
 
-
 reactionSites :: Enzyme a -> Graph [Node a] -> [ReactionSite a] 
 reactionSites enzyme graph =
   let matches = match (pattern enzyme) graph
@@ -40,7 +39,6 @@ runEnzyme enzyme graph =
   let
     rs = reactionSites enzyme graph
   in foldl' (flip reactInGraph) graph rs
-
 
 reactInGraph 
   :: (Enum a, Ord a) 

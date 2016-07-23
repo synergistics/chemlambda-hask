@@ -7,7 +7,6 @@ module Chemlambda.Core.Port
 import Chemlambda.Core.Connectable
 
 
-
 -- A port for a Chemlambda atom 
 data Port a
   = Li { portId :: a }
