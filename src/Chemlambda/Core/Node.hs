@@ -34,7 +34,7 @@ instance Eq a => Connectable (Node a) where
 
 
 hasPortId :: (Eq a) => Node a -> a -> Bool
-hasPortId n i = elem i (map portId $ ports n)
+hasPortId n id = elem id (map portId $ ports n)
 
 
 lam :: a -> a -> a -> Node a

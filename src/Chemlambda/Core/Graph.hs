@@ -16,6 +16,7 @@ module Chemlambda.Core.Graph
 
 import qualified Data.List as L
 import Data.List ((\\))
+import qualified Data.Vector as V
 import Chemlambda.Core.Connectable
 import Chemlambda.Core.Port
 import Chemlambda.Core.Atom

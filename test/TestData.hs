@@ -36,8 +36,12 @@ y = Graph
   ]
 
 meh = Graph
-  [ fo 0 1 2
-  , lam 3 3 0]
+  [ lam 0 1 2
+  , lam 2 0 3 
+  , app 3 6 5
+  , lam 4 4 6]
+
+
 skk = Graph
   [ foe 3 1 2
   , lam 5 4 3
