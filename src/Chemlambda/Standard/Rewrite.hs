@@ -55,9 +55,3 @@ rewrite graph =
   in runCombCycle result
 
 rewriteCycle times graph = iterate rewrite graph !! times
-  -- let 
-  --   result = foldl
-  --              (\graph' e -> runEnzyme e graph')
-  --              graph
-  --              (concat ess)
-  -- in runCombCycle result
