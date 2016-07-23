@@ -14,7 +14,7 @@ import Chemlambda.Core.Atom
 import Chemlambda.Core.Node
 import Chemlambda.Core.Graph
 
--- Usually matches a subgraph of a graph
+
 newtype Pattern a b = Pattern (Graph a -> [b])
 
 instance Functor (Pattern a) where
