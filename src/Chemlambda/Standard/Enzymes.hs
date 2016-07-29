@@ -1,5 +1,6 @@
 module Chemlambda.Standard.Enzymes
-  ( standardEnzymes 
+  ( enzymeList
+  , deterministicEnzymeList
   , betaEnzyme
   , combEnzyme
   , fanInEnzyme
@@ -22,8 +23,25 @@ import Chemlambda.Standard.Patterns
 import Chemlambda.Standard.Moves
 
 
-standardEnzymes :: Eq a => [[Enzyme a]]
-standardEnzymes =
+enzymeList :: Eq a => [Enzyme a]
+enzymeList = 
+  [ distFOEnzyme
+  , distAEnzyme
+  , distLEnzyme
+  , distFIEnzyme
+  , betaEnzyme
+  , fanInEnzyme
+  , pruneAEnzyme
+  , pruneLEnzyme
+  , pruneFIEnzyme
+  , pruneFObEnzyme
+  , pruneFOEbEnzyme
+  , pruneFOcEnzyme
+  , pruneFOEcEnzyme
+  ]
+
+deterministicEnzymeList :: Eq a => [[Enzyme a]]
+deterministicEnzymeList =
   [ [ distFOEnzyme ]
   , [ distAEnzyme, distLEnzyme, distFIEnzyme ]
   , [ betaEnzyme, fanInEnzyme ]

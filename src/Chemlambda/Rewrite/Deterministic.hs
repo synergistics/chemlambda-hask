@@ -1,4 +1,4 @@
-module Chemlambda.Standard.Rewrite 
+module Chemlambda.Rewrite.Deterministic
   ( rewrite 
   , rewriteCycle
   , runCombCycle
@@ -35,10 +35,10 @@ rewrite graph =
   let 
     result = 
       foldl
-        (\graph r -> 
-          reactInGraph r graph)
+        (\graph rsite -> 
+          reactInGraph rsite graph)
         graph
-        (orderedReactionSites graph standardEnzymes)
+        (deterministicReactionSites graph deterministicEnzymeList)
   in runCombCycle result
 
 rewriteCycle times graph = iterate rewrite graph !! times
