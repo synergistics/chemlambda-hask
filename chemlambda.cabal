@@ -29,9 +29,11 @@ library
                   , Chemlambda.Standard.Enzymes
                   , Chemlambda.Standard.Rewrite
                   , Chemlambda.Pretty
-
-  build-depends:    base >=4.9 && <4.10, containers >=0.5 && <0.6, pretty-show, vector
-  hs-source-dirs:   src
+--                  , Chemlambda.Experimental.Reaction
+  other-modules:    TestData
+  build-depends:    base >=4.9 && <4.10, containers >=0.5 && <0.6, pretty-show 
+  -- , vector, parallel
+  hs-source-dirs:   src, test
   default-language: Haskell2010
 
 test-suite hspec
@@ -43,8 +45,9 @@ test-suite hspec
   default-language: Haskell2010
 
 benchmark bench
-  build-depends:    base, chemlambda, criterion 
-  hs-source-dirs:   bench
+  build-depends:    base, chemlambda, criterion, parallel
+  other-modules:    TestData
+  hs-source-dirs:   bench, test
   main-is:          Main.hs
   type:             exitcode-stdio-1.0
   default-language: Haskell2010

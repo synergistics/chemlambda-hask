@@ -12,5 +12,6 @@ import Chemlambda.Core.Reaction
 import Chemlambda.Standard.Rewrite
 -- import Test.Hspec 
 
+rewriteCycle times graph = iterate rewrite graph !! times
 main :: IO ()
-main = pp $ rewriteCycle 101 quine 
+main = print $ rewriteCycle 100 y 

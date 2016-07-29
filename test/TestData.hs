@@ -2,7 +2,17 @@ module TestData where
 
 import Chemlambda.Core.Node
 import Chemlambda.Core.Graph
+import Chemlambda.Core.Reaction
+import Chemlambda.Standard.Enzymes
 
+
+succNode node = node { ports = map ((+ 15) <$>) $ ports node }
+longIdentity = 
+  ( Graph . concat . take 300 . iterate (map succNode)) 
+    [ lam 4 4 5
+    , app 5 2 9
+    , foe 9 10 11
+    ]
 
 identity = Graph
   [ lam 4 4 5
@@ -39,8 +49,8 @@ meh = Graph
   [ lam 0 1 2
   , lam 2 0 3 
   , app 3 6 5
-  , lam 4 4 6]
-
+  , lam 4 4 6
+  ]
 
 skk = Graph
   [ foe 3 1 2
