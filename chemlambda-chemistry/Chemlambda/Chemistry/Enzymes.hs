@@ -1,4 +1,4 @@
-module Chemlambda.Standard.Enzymes
+module Chemlambda.Chemistry.Enzymes
   ( enzymeList
   , deterministicEnzymeList
   , betaEnzyme
@@ -19,8 +19,8 @@ module Chemlambda.Standard.Enzymes
   where
 
 import Chemlambda.Core.Reaction
-import Chemlambda.Standard.Patterns
-import Chemlambda.Standard.Moves
+import Chemlambda.Chemistry.Patterns
+import Chemlambda.Chemistry.Moves
 
 
 enzymeList :: Eq a => [Enzyme a]

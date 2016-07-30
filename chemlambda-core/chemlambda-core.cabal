@@ -16,7 +16,6 @@ cabal-version:       >=1.10
 
 library
   default-language: Haskell2010
-  hs-source-dirs: src
 
   exposed-modules:
     Chemlambda.Core.Node,

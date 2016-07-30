@@ -17,9 +17,15 @@ extra-source-files:  ChangeLog.md
 cabal-version:       >=1.10
 
 library
-  -- exposed-modules:     
+  exposed-modules:
+    Chemlambda.Chemistry.Patterns
+    Chemlambda.Chemistry.Moves
+    Chemlambda.Chemistry.Enzymes
+
   -- other-modules:       
   -- other-extensions:    
-  build-depends:       base >=4.9 && <4.10
+  build-depends:
+    base >=4.9 && <4.10,
+    chemlambda-core
   -- hs-source-dirs:      
   default-language:    Haskell2010

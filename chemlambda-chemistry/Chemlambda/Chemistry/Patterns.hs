@@ -1,4 +1,4 @@
-module Chemlambda.Standard.Patterns 
+module Chemlambda.Chemistry.Patterns 
   ( betaPattern
   , combPattern
   , fanInPattern

@@ -1,6 +1,6 @@
 {-# LANGUAGE MultiWayIf #-}
 
-module Chemlambda.Standard.Moves
+module Chemlambda.Chemistry.Moves
   ( betaMove
   , combMove
   , fanInMove
