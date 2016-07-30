@@ -41,6 +41,7 @@ resolver: nightly-2016-07-14
 packages:
   - 'chemlambda-core'
   - 'chemlambda-chemistry'
+  - 'chemlambda-experimental'
 
    
 # Dependency packages to be pulled from upstream that are not in the resolver

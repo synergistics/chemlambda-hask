@@ -25,17 +25,10 @@ library
     Chemlambda.Core.Atom,
     Chemlambda.Core.Reaction,
     Chemlambda.Core.Connectable
-    -- Chemlambda.Standard.Patterns,
-    -- Chemlambda.Standard.Moves,
-    -- Chemlambda.Standard.Enzymes,
-    -- Chemlambda.Rewrite.Random,
-    -- Chemlambda.Pretty
-    -- Chemlambda.Rewrite.Deterministic
     
   build-depends:
     base >=4.9 && <4.10,
     containers >=0.5 && <0.6,
-    pretty-show,
     random
     -- , vector
     -- , parallel
@@ -52,6 +45,7 @@ test-suite test
     pretty-show,
     hspec,
     chemlambda-core
+
 
   ghc-options:
     -O2

@@ -1,4 +1,4 @@
-module Chemlambda.Experimental.Graph where
+module Chemlambda.Experimental.ComonadicGraphs.Graph where
 
 data Atom = L | FO | FOE | A | FI | ARROW | FRIN | FROUT | T deriving ( Show, Eq )
 data Node a = Node Atom [a] deriving ( Show, Eq )

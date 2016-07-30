@@ -1,12 +1,12 @@
-module Chemlambda.Experimental.Reaction where
+module Chemlambda.Experimental.ComonadicGraphs.Reaction where
 
 import Data.List
 import Chemlambda.Core.Port
 import Chemlambda.Core.Node
 import Chemlambda.Core.Graph
 import Chemlambda.Core.Pattern
-import Chemlambda.Standard.Patterns
-import Chemlambda.Standard.Moves
+import Chemlambda.Chemistry.Patterns
+import Chemlambda.Chemistry.Moves
 
 
 data Enzyme a = Enzyme
