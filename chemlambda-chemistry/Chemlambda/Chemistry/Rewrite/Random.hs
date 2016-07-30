@@ -1,11 +1,11 @@
-module Chemlambda.Rewrite.Random where
+module Chemlambda.Chemistry.Rewrite.Random where
 
 import Chemlambda.Core.Port
 import Chemlambda.Core.Node
 import Chemlambda.Core.Graph
 import Chemlambda.Core.Pattern
 import Chemlambda.Core.Reaction
-import Chemlambda.Standard.Enzymes
+import Chemlambda.Chemistry.Enzymes
 
 
 runCombCycle :: (Enum a, Ord a) => Graph [Node a] -> Graph [Node a]

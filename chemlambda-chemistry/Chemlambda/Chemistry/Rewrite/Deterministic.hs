@@ -1,4 +1,4 @@
-module Chemlambda.Rewrite.Deterministic
+module Chemlambda.Chemistry.Rewrite.Deterministic
   ( rewrite 
   , rewriteCycle
   , runCombCycle
@@ -11,7 +11,7 @@ import Chemlambda.Core.Node
 import Chemlambda.Core.Graph
 import Chemlambda.Core.Pattern
 import Chemlambda.Core.Reaction
-import Chemlambda.Standard.Enzymes
+import Chemlambda.Chemistry.Enzymes
 
 runCombCycle :: (Enum a, Ord a) => Graph [Node a] -> Graph [Node a]
 runCombCycle graph = 
