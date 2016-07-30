@@ -1,7 +1,7 @@
-name:                chemlambda
+name:                chemlambda-core
 version:             0.1.0
-synopsis:            An implementation of Chemlambda in haskell
--- description:         
+synopsis:            An implementation of the artificial chemistry Chemlambda in haskell
+description:         The core components of the Chemlambda project
 homepage:            https://github.com/synergistics
 license:             BSD3
 license-file:        LICENSE
@@ -25,12 +25,12 @@ library
     Chemlambda.Core.Port,
     Chemlambda.Core.Atom,
     Chemlambda.Core.Reaction,
-    Chemlambda.Core.Connectable,
-    Chemlambda.Standard.Patterns,
-    Chemlambda.Standard.Moves,
-    Chemlambda.Standard.Enzymes,
-    Chemlambda.Rewrite.Random,
-    Chemlambda.Pretty
+    Chemlambda.Core.Connectable
+    -- Chemlambda.Standard.Patterns,
+    -- Chemlambda.Standard.Moves,
+    -- Chemlambda.Standard.Enzymes,
+    -- Chemlambda.Rewrite.Random,
+    -- Chemlambda.Pretty
     -- Chemlambda.Rewrite.Deterministic
     
   build-depends:
@@ -50,9 +50,9 @@ test-suite test
 
   build-depends:
     base, 
-    chemlambda,
+    pretty-show,
     hspec,
-    pretty-show
+    chemlambda-core
 
   ghc-options:
     -O2
