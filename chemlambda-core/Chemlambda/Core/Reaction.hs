@@ -78,18 +78,22 @@ randomReactionSites graph enzymes =
     randomChoiceSites
 
 deterministicReactionSites :: Eq a => Graph [Node a] -> [[Enzyme a]] -> [ReactionSite a]
-deterministicReactionSites graph lolEnzymes = snd $ foldl'
--- (list of lists of enzymes)
-  (\(graph, rsites) enzymes ->
-    let
-      rsites' = concatMap (\enzyme -> reactionSites enzyme graph) enzymes
-      sites   = map site rsites'
-      graph'  = foldl' minus graph sites
-    in (graph', rsites' ++ rsites))
-  (graph, [])
-  lolEnzymes
+-- deterministicReactionSites graph lolEnzymes = snd $ foldl'
+-- -- (list of lists of enzymes)
+--   (\(graph, rsites) enzymes ->
+--     let
+--       rsites' = concatMap (\enzyme -> reactionSites enzyme graph) enzymes
+--       sites   = map site rsites'
+--       graph'  = foldl' minus graph sites
+--     in (graph', rsites' ++ rsites))
+--   (graph, [])
+--   lolEnzymes
 
-
+deterministicReactionSites graph lolEnzymes =
+  let
+    rsites = concatMap (concatMap (\enzyme -> reactionSites enzyme graph)) lolEnzymes
+  in
+    nubBy (\rsA rsB -> sitesOverlap rsA rsB) rsites 
 -- reactionSitesMult :: Eq a => [Enzyme a] -> Graph [Node a] -> [ReactionSite a]
 -- reactionSitesMult enzymes graph =
 --   concatMap (\enzyme -> reactionSites enzyme graph) enzymes
