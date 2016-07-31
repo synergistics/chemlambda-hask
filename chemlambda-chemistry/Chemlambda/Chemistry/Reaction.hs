@@ -1,4 +1,4 @@
-module Chemlambda.Core.Reaction
+module Chemlambda.Chemistry.Reaction
   ( Enzyme(..)
   , ReactionSite(..)
   , sitesOverlap

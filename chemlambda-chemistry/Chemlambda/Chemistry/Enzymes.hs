@@ -18,7 +18,7 @@ module Chemlambda.Chemistry.Enzymes
   )
   where
 
-import Chemlambda.Core.Reaction
+import Chemlambda.Chemistry.Reaction
 import Chemlambda.Chemistry.Patterns
 import Chemlambda.Chemistry.Moves
 

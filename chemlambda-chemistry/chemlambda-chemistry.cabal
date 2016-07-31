@@ -23,6 +23,7 @@ library
     Chemlambda.Chemistry.Patterns
     Chemlambda.Chemistry.Moves
     Chemlambda.Chemistry.Enzymes
+    Chemlambda.Chemistry.Reaction
     Chemlambda.Chemistry.Rewrite.Util
     Chemlambda.Chemistry.Rewrite.Deterministic
     Chemlambda.Chemistry.Rewrite.Random
@@ -31,6 +32,7 @@ library
   -- other-extensions:    
   build-depends:
     base >=4.9 && <4.10,
+    random,
     chemlambda-core
 
 test-suite chemistry-test

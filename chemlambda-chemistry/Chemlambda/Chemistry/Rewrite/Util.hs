@@ -9,7 +9,7 @@ module Chemlambda.Chemistry.Rewrite.Util
 import Chemlambda.Core.Node
 import Chemlambda.Core.Graph
 import Chemlambda.Core.Pattern
-import Chemlambda.Core.Reaction
+import Chemlambda.Chemistry.Reaction
 import Chemlambda.Chemistry.Enzymes
 
 runCombCycle :: (Enum a, Ord a) => Graph [Node a] -> Graph [Node a]

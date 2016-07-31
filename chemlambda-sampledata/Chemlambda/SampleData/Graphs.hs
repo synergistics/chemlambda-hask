@@ -2,7 +2,6 @@ module Chemlambda.SampleData.Graphs where
 
 import Chemlambda.Core.Node
 import Chemlambda.Core.Graph
-import Chemlambda.Core.Reaction
 
 
 longIdentity = Graph . concat . take 1000 . iterate (map succNode) $ nodes identity

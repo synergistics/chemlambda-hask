@@ -6,7 +6,7 @@ import Chemlambda.Core.Port
 import Chemlambda.Core.Node
 import Chemlambda.Core.Graph
 import Chemlambda.Core.Pattern
-import Chemlambda.Core.Reaction
+import Chemlambda.Chemistry.Reaction
 import Chemlambda.Chemistry.Enzymes
 import Chemlambda.Chemistry.Rewrite.Util  
 

@@ -23,13 +23,11 @@ library
     Chemlambda.Core.Graph,
     Chemlambda.Core.Port,
     Chemlambda.Core.Atom,
-    Chemlambda.Core.Reaction,
     Chemlambda.Core.Connectable
     
   build-depends:
     base >=4.9 && <4.10,
-    containers >=0.5 && <0.6,
-    random
+    containers >=0.5 && <0.6
     -- , vector
     -- , parallel
 
