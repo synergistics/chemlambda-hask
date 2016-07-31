@@ -1,4 +1,6 @@
-module Chemlambda.Chemistry.Rewrite.Random where
+module Chemlambda.Chemistry.Rewrite.Random 
+  ( randRewrite )
+  where
 
 import Chemlambda.Core.Port
 import Chemlambda.Core.Node
@@ -6,27 +8,11 @@ import Chemlambda.Core.Graph
 import Chemlambda.Core.Pattern
 import Chemlambda.Core.Reaction
 import Chemlambda.Chemistry.Enzymes
+import Chemlambda.Chemistry.Rewrite.Util  
 
 
-runCombCycle :: (Enum a, Ord a) => Graph [Node a] -> Graph [Node a]
-runCombCycle graph = 
-  let
-    comb graph = 
-      let a = reactionSites combEnzyme graph
-      in case a of
-        [] -> graph
-        _  -> reactInGraph (head a) graph
-
-    go (Graph []) curr = go curr (comb curr)
-    go prev curr = 
-      if prev == curr
-        then curr
-        else go curr (comb curr)
-  in
-    go (Graph []) graph
-
-rewrite :: (Ord a, Enum a) => Graph [Node a] -> IO (Graph [Node a])
-rewrite graph =
+randRewrite :: (Ord a, Enum a) => Graph [Node a] -> IO (Graph [Node a])
+randRewrite graph =
   do
     sites <- randomReactionSites graph enzymeList    
     let
@@ -37,12 +23,3 @@ rewrite graph =
           graph
           sites  
     return $ runCombCycle result
-
-rewriteCycle times graph = 
-  let
-    a ioGraph =
-      do
-        g <- ioGraph
-        rewrite g 
-    in iterate a (rewrite graph) !! times
-

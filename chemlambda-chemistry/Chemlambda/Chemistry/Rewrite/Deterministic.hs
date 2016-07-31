@@ -1,8 +1,5 @@
 module Chemlambda.Chemistry.Rewrite.Deterministic
-  ( rewrite 
-  , rewriteCycle
-  , runCombCycle
-  )
+  ( detRewrite )
   where
 
 import Data.List
@@ -12,26 +9,10 @@ import Chemlambda.Core.Graph
 import Chemlambda.Core.Pattern
 import Chemlambda.Core.Reaction
 import Chemlambda.Chemistry.Enzymes
+import Chemlambda.Chemistry.Rewrite.Util  
 
-runCombCycle :: (Enum a, Ord a) => Graph [Node a] -> Graph [Node a]
-runCombCycle graph = 
-  let
-    comb graph = 
-      let a = reactionSites combEnzyme graph
-      in case a of
-        [] -> graph
-        _  -> reactInGraph (head a) graph
-
-    go (Graph []) curr = go curr (comb curr)
-    go prev curr = 
-      if prev == curr
-        then curr
-        else go curr (comb curr)
-  in
-    go (Graph []) graph
-
-rewrite :: (Ord a, Enum a) => Graph [Node a] -> Graph [Node a] 
-rewrite graph =
+detRewrite :: (Ord a, Enum a) => Graph [Node a] -> Graph [Node a] 
+detRewrite graph =
   let 
     result = 
       foldl
@@ -40,5 +21,3 @@ rewrite graph =
         graph
         (deterministicReactionSites graph deterministicEnzymeList)
   in runCombCycle result
-
-rewriteCycle times graph = iterate rewrite graph !! times

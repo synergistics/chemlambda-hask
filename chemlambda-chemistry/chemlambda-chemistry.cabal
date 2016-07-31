@@ -5,7 +5,7 @@ name:                chemlambda-chemistry
 version:             0.1.0
 synopsis:            The standard rules of chemistry for Chemlambda
 -- description:         
-homepage:            https://github.com
+homepage:            https://github.com/synergistics/chemlambda-hask
 license:             BSD3
 license-file:        LICENSE
 author:              synergistics
@@ -23,6 +23,7 @@ library
     Chemlambda.Chemistry.Patterns
     Chemlambda.Chemistry.Moves
     Chemlambda.Chemistry.Enzymes
+    Chemlambda.Chemistry.Rewrite.Util
     Chemlambda.Chemistry.Rewrite.Deterministic
     Chemlambda.Chemistry.Rewrite.Random
 
@@ -34,9 +35,12 @@ library
 
 test-suite chemistry-test
   default-language: Haskell2010
-  hs-source-dirs: test
-  main-is: Main.hs
   type: exitcode-stdio-1.0
+  hs-source-dirs: test
+
+  main-is: Main.hs
+  other-modules:
+    RewritesTests
 
   build-depends:
     base, 
