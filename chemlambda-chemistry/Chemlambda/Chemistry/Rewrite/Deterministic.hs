@@ -19,5 +19,5 @@ detRewrite graph =
         (\graph rsite -> 
           reactInGraph rsite graph)
         graph
-        (deterministicReactionSites graph deterministicEnzymeList)
+        (deterministicReactionSites graph enzymeList)
   in runCombCycle result

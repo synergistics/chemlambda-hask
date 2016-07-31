@@ -32,6 +32,7 @@ library
   -- other-extensions:    
   build-depends:
     base >=4.9 && <4.10,
+    extra,
     random,
     chemlambda-core
 
@@ -55,3 +56,25 @@ test-suite chemistry-test
     -O2
     -threaded
     -fprof-auto
+
+benchmark reactionsites
+  default-language: Haskell2010
+  type: exitcode-stdio-1.0
+  hs-source-dirs: bench
+
+  main-is: Main.hs
+  other-modules:
+    ReactionSitesBench
+
+  build-depends:
+    base, 
+    criterion,
+    chemlambda-core,
+    chemlambda-chemistry,
+    chemlambda-sampledata
+
+  ghc-options:
+    -O2
+    -threaded
+    -fprof-auto
+  

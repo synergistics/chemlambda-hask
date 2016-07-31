@@ -4,7 +4,7 @@ import Chemlambda.Core.Node
 import Chemlambda.Core.Graph
 
 
-longIdentity = Graph . concat . take 1000 . iterate (map succNode) $ nodes identity
+longIdentity = Graph . concat . take 100 . iterate (map succNode) $ nodes identity
   where
     succNode node = node { ports = map ((+ 15) <$>) $ ports node }
 

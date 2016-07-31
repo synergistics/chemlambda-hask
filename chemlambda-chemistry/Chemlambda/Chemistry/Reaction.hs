@@ -13,6 +13,7 @@ module Chemlambda.Chemistry.Reaction
 -- Test performance differences with reacting automatically (lazily so not really) versus
 -- going through the intermediate step of ReactionSite
 import Data.List
+import Data.List.Extra
 import System.Random
 import Chemlambda.Core.Port
 import Chemlambda.Core.Node
@@ -62,22 +63,36 @@ randomReactionSites graph enzymes =
     rsites            = concatMap (\enzyme -> reactionSites enzyme graph) enzymes
     randomChoiceSites = 
       do
-        gen <- newStdGen
+        boolGen <- newStdGen
+        numGen  <- newStdGen
         let 
-          pairs  = zip rsites (randoms gen :: [Bool]) 
+          shuffleSites = sortBy $ \(_,_,a) (_,_,b) -> compare a b
+
+          pairs  = shuffleSites $ zip3 rsites (randoms boolGen :: [Bool]) (randoms numGen :: [Int])
           picked =                                
             foldr                                      
-              (\(rsite, picked) rsitesAcc ->           
+              (\(rsite, picked, _) rsitesAcc ->           
                 if picked                              
                   then rsite:rsitesAcc                 
                   else rsitesAcc)                      
               []                                       
               pairs                                    
         return $ nubBy (\rsA rsB -> sitesOverlap rsA rsB) picked
+        -- return $ nubOrdBy (\rsA rsB -> if sitesOverlap rsA rsB then EQ else LT) picked
   in
     randomChoiceSites
 
-deterministicReactionSites :: Eq a => Graph [Node a] -> [[Enzyme a]] -> [ReactionSite a]
+
+
+deterministicReactionSites :: Eq a => Graph [Node a] -> [Enzyme a] -> [ReactionSite a]
+deterministicReactionSites graph enzymes =
+  let
+    rsites = concatMap (\enzyme -> reactionSites enzyme graph) enzymes
+    picked = drop (length rsites `div` 2) rsites
+  in
+    nubOrdBy (\rsA rsB -> if sitesOverlap rsA rsB then EQ else LT) picked
+    -- nubBy (\rsA rsB -> sitesOverlap rsA rsB) picked 
+
 -- deterministicReactionSites graph lolEnzymes = snd $ foldl'
 -- -- (list of lists of enzymes)
 --   (\(graph, rsites) enzymes ->
@@ -89,22 +104,3 @@ deterministicReactionSites :: Eq a => Graph [Node a] -> [[Enzyme a]] -> [Reactio
 --   (graph, [])
 --   lolEnzymes
 
-deterministicReactionSites graph lolEnzymes =
-  let
-    rsites = concatMap (concatMap (\enzyme -> reactionSites enzyme graph)) lolEnzymes
-  in
-    nubBy (\rsA rsB -> sitesOverlap rsA rsB) rsites 
--- reactionSitesMult :: Eq a => [Enzyme a] -> Graph [Node a] -> [ReactionSite a]
--- reactionSitesMult enzymes graph =
---   concatMap (\enzyme -> reactionSites enzyme graph) enzymes
-
--- Decent
--- runEnzyme
---   :: (Ord a, Enum a)
---   => Enzyme a
---   -> Graph [Node a]
---   -> Graph [Node a]
--- runEnzyme enzyme graph =
---   let
---     rsites = reactionSites enzyme graph
---   in foldl' (flip reactInGraph) graph rsites

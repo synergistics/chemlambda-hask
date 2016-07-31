@@ -25,12 +25,15 @@ instance Show a => Show (Node a) where
 instance Eq a => Connectable (Node a) where
   connects m n = 
     let
-      possibleConns =
-        do
-          a <- ports m
-          b <- ports n
-          return (a,b)
-    in any (\(a,b) -> a `connects` b) possibleConns
+      shared = L.intersectBy (\p q -> connects p q) (ports m) (ports n)
+    in
+      not $ null shared
+      -- possibleConns =
+      --   do
+      --     a <- ports m
+      --     b <- ports n
+      --     return (a,b)
+    -- in any (\(a,b) -> a `connects` b) possibleConns
 
 
 hasPortId :: (Eq a) => Node a -> a -> Bool
