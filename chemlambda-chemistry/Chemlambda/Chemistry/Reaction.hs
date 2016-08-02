@@ -77,8 +77,8 @@ randomReactionSites graph enzymes =
                   else rsitesAcc)                      
               []                                       
               pairs                                    
-        return $ nubBy (\rsA rsB -> sitesOverlap rsA rsB) picked
-        -- return $ nubOrdBy (\rsA rsB -> if sitesOverlap rsA rsB then EQ else LT) picked
+        -- return $ nubBy (\rsA rsB -> sitesOverlap rsA rsB) picked
+        return $ nubOrdBy (\rsA rsB -> if sitesOverlap rsA rsB then EQ else LT) picked
   in
     randomChoiceSites
 
