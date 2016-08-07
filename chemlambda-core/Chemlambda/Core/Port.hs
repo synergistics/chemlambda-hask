@@ -4,10 +4,11 @@ module Chemlambda.Core.Port
   , isLi, isRi, isMi, isLo, isRo, isMo
   , mkActualId
   ) where
+
 import Chemlambda.Core.Connectable
 
 
--- A port for a Chemlambda atom 
+-- | A port for a Chemlambda node
 data Port a
   = Li { portId :: a }
   | Ri { portId :: a }
@@ -38,12 +39,15 @@ instance Eq a => Connectable (Port a) where
   connects p q = portId p == portId q && p /= q
 
 
+-- | A wrapper on port ids used to label new and actual ids to be added to a Graph
 data NewId a = NewId Int | ActualId a deriving ( Show )
 
+-- | Constructs a NewId
 mkActualId :: Port a -> NewId a
 mkActualId = ActualId . portId
 
 
+-- === Constructor predicates
 isLi :: Port a -> Bool
 isLi (Li _) = True
 isLi _      = False
@@ -67,11 +71,3 @@ isRo _      = False
 isMo :: Port a -> Bool
 isMo (Mo _) = True
 isMo _      = False
-
-complement :: Port a -> Port a
-complement (Li a) = Lo a
-complement (Ri a) = Ro a
-complement (Mi a) = Mo a
-complement (Lo a) = Li a 
-complement (Ro a) = Ri a 
-complement (Mo a) = Mi a 

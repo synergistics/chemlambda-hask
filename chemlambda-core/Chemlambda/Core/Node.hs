@@ -8,12 +8,14 @@ module Chemlambda.Core.Node
   )
   where
 
-import qualified Data.List as L
+import Data.List
 import Chemlambda.Core.Connectable
 import Chemlambda.Core.Atom
 import Chemlambda.Core.Port
 
 
+-- | A Chemlambda node
+-- A @Node@ is a combination of an 'Atom' and a list of 'Port's
 data Node a = Node
   { atom  :: Atom
   , ports :: [Port a] }
@@ -22,24 +24,20 @@ data Node a = Node
 instance Show a => Show (Node a) where
   show (Node a ps) = "Node " ++ show a ++ " " ++ show ps
 
+-- | Two @Node@s connect via a connection at one or more of their ports
 instance Eq a => Connectable (Node a) where
   connects m n = 
     let
-      shared = L.intersectBy (\p q -> connects p q) (ports m) (ports n)
+      shared = intersectBy (\p q -> connects p q) (ports m) (ports n)
     in
       not $ null shared
-      -- possibleConns =
-      --   do
-      --     a <- ports m
-      --     b <- ports n
-      --     return (a,b)
-    -- in any (\(a,b) -> a `connects` b) possibleConns
 
 
-hasPortId :: (Eq a) => Node a -> a -> Bool
-hasPortId n id = elem id (map portId $ ports n)
+hasPortId :: Eq a => Node a -> a -> Bool
+hasPortId node id = elem id $ (map portId . ports) node
 
 
+-- === Elementary molecule (defined by the Chemlambda specification) constructors
 lam :: a -> a -> a -> Node a
 lam a b c = Node L [Mi a, Lo b, Ro c]
 
@@ -68,11 +66,15 @@ t :: a -> Node a
 t a = Node T [Mi a]
 
 
+-- | A @PortSel@ selects a port in a 'Node'
 type PortSel a = Node a -> Maybe (Port a)
 
+-- | @mkPortSel@ takes a port constructor predicate
 mkPortSel :: (Port a -> Bool) -> PortSel a
-mkPortSel isPort = L.find isPort . ports
+mkPortSel isPort = find isPort . ports
 
+
+-- === Port selectors
 liPort :: PortSel a
 liPort = mkPortSel isLi
 

@@ -14,14 +14,16 @@ module Chemlambda.Core.Graph
   )
   where
 
-import qualified Data.List as L
-import Data.List ((\\))
+import Data.List
 import Chemlambda.Core.Connectable
 import Chemlambda.Core.Port
 import Chemlambda.Core.Atom
 import Chemlambda.Core.Node
 
 
+-- | A Graph will in most cases be a list of nodes
+-- This is my least favorite part of my implementation
+-- todo: Make the Graph type have more structure, maybe try a map eventually 
 newtype Graph a = Graph { nodes :: a } deriving ( Show, Eq )
 
 instance Functor Graph where
@@ -40,12 +42,17 @@ instance Monoid (Graph [a]) where
   mappend graphA graphB = (++) <$> graphA <*> graphB
   
 
+-- | @minus@ takes the left outer join on graphs
 minus :: Eq a => Graph [a] -> Graph [a] -> Graph [a]
 g1 `minus` g2 = (\\) <$> g1 <*> g2
 
+-- | @plus@ takes the union of graphs
 plus :: Eq a => Graph [a] -> Graph [a] -> Graph [a]
 plus = mappend
 
+-- | @plusNew@ adds 'Node's holding 'Port's with 'NewId's and adds them to a graph 
+-- @NewId Int@s are reified by replacing their port number with an unused port number in the starting graph
+-- @ActualId a@s are reified by adding their inner port id without modification
 plusNew 
   :: (Enum a, Ord a)
   => Graph [Node a] 
@@ -67,30 +74,34 @@ plusNew graph graphNew =
     graph `plus` graph'
 
 
-connections :: (Eq a, Connectable a) => a -> Graph [a] -> [a]
+-- | @connections@ returns the list of nodes connected to a node in a graph
+connections :: (Eq a) => Node a -> Graph [Node a] -> [Node a]
 connections node graph 
   | elem node (nodes graph) = filter (connects node) (nodes graph)
   | otherwise               = []
 
+
+-- | See, stupid.
 fromNode :: a -> Graph [a]
 fromNode node = return [node]
 
 
+-- | Possibly selects a node given a graph
 type NodeSelector a = Node a -> Graph [Node a] -> Maybe (Node a)
 
+-- | Makes a NodeSelector for a node at a given port of another
 selectNodeAtPort 
   :: Eq a 
   => (Node a -> Maybe (Port a)) 
   -> NodeSelector a 
-selectNodeAtPort portSel node graph = 
-  case portSel node of 
-    Nothing   -> Nothing
-    Just port ->
-      let 
-        conns = connections node graph
-      in 
-        L.find (\n -> any (connects port) $ ports n) conns 
+selectNodeAtPort portSel node graph = portSel node >>= findNode
+  where
+    findNode port = 
+      let conns = connections node graph
+      in find (\n -> any (connects port) $ ports n) conns 
 
+
+-- === Node selectors
 li :: Eq a => NodeSelector a
 li = selectNodeAtPort liPort
 
@@ -110,17 +121,16 @@ mo :: Eq a => NodeSelector a
 mo = selectNodeAtPort moPort
 
 
+-- | Returns a list of unused portIds in a graph
 unusedPortIds
   :: forall a. (Enum a, Ord a)
   => Graph [Node a]
   -> [a]
 unusedPortIds graph = 
   let
-    possible  = iterate succ (toEnum 0 :: a)
-    inUse     = concatMap (map portId . ports) $ nodes graph
-    unused    = tail $ iterate succ (maximum inUse)
-    -- unused = filter (\p -> not $ elem p inUse) possible
-    -- unused = possible \\ inUse
+    possible = iterate succ (toEnum 0 :: a)
+    inUse    = concatMap (map portId . ports) $ nodes graph
+    unused   = tail $ iterate succ (maximum inUse)
   in
     case graph of
       Graph [] -> possible

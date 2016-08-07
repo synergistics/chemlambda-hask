@@ -15,6 +15,7 @@ import Chemlambda.Core.Node
 import Chemlambda.Core.Graph
 
 
+-- | A @Pattern@ is a function that finds things that match a pattern in a graph
 newtype Pattern a b = Pattern (Graph a -> [b])
 
 instance Functor (Pattern a) where
@@ -37,6 +38,7 @@ instance Monad (Pattern a) where
   p >>= f = Pattern $ \graph -> concatMap (\res -> match (f res) graph) $ match p graph
 
 
+-- | Matches a @Pattern@ on a Graph
 match :: Pattern a b -> Graph a -> [b]
 match (Pattern applyPattern) graph = applyPattern graph
 
@@ -56,19 +58,20 @@ match (Pattern applyPattern) graph = applyPattern graph
 --       nodes
 
 
--- Matches any Node
+-- | @anyNode@ returns all the nodes in a graph
 anyNode :: Pattern [Node a] (Node a)
 anyNode = Pattern nodes
 
--- Matches Nodes with an atom of 'a'
+-- | @atomOf@ matches nodes with a certain 'Atom' 
 atomOf :: Atom -> Pattern [Node a] (Node a)
 atomOf a = Pattern $ filter (\node -> a == atom node) . nodes
 
-nodeOf :: (Eq a) => Node a -> Pattern [Node a] (Node a)
+-- | @nodeOf@ matches equivalent nodes
+nodeOf :: Eq a => Node a -> Pattern [Node a] (Node a)
 nodeOf n = Pattern $ filter (== n) . nodes
 
--- Combines two patterns on Nodes
--- Matches on a connection between the Nodes they return
+-- | @conn@ matches on a connection between the nodes resulting from two patterns
+-- Each result is put into a graph
 conn
   :: Eq a
   => Pattern [Node a] (Node a)
@@ -95,6 +98,7 @@ conn patternA patternB portsA portsB = Pattern $ \graph ->
       (a,b) <- matchPairs
       (p,q) <- portPairs
       return (a,b,p,q)
+    
+    connectedPairs = filter (\(a,b,p,q) -> connectsAtPorts a b p q graph) connGroups
 
-  -- in matchPairs
-  in map (\(a,b,p,q) -> Graph [a,b]) $ filter (\(a,b,p,q) -> connectsAtPorts a b p q graph) connGroups
+  in map (\(a,b,p,q) -> Graph [a,b]) connectedPairs
