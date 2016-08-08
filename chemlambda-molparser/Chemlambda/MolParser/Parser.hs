@@ -3,24 +3,20 @@
 module Chemlambda.MolParser.Parser where
 
 import Data.Maybe ( fromJust )
-import Chemlambda.Core.Port
+import qualified Data.Map as M
+
 import Chemlambda.Core.Atom
 import Chemlambda.Core.Graph
-
 import Chemlambda.Core.Node
-import qualified Data.Map as Map
--- import Control.Monad.Writer
+
 import Control.Monad
-import Control.Monad.Identity
-import Control.Monad.State
--- import System.Random
+
 import Text.Parsec
 import Text.Parsec.Char
-import Text.Parsec.String
 import Text.Parsec.Error
 
 
-atomP :: Parsec String (Int, Map.Map String Int) Atom
+atomP :: Parsec String (Int, M.Map String Int) Atom
 atomP =
   let 
     as = map try 
@@ -37,26 +33,27 @@ atomP =
   in choice as 
 
 
--- nodeP :: Parsec String (Int, Map.Map String Int) (Node Int)
+nodeP :: Parsec String (Int, M.Map String Int) (Node Int)
 nodeP = do
   a <- between spaces (many1 space) atomP
   -- IAaMFG
   words <- count (valence a) word 
   
   forM_ words $ \w -> do
-    modifyState (\(i, m) -> if Map.notMember w m 
-                              then (i+1, Map.insert w i m)
+    modifyState (\(i, m) -> if M.notMember w m 
+                              then (i+1, M.insert w i m)
                               else (i, m))
 
   (i, m) <- getState
   return (toNode a words m) 
-
   where
     word = do
       w <- many1 (alphaNum <|> char '_')
       spaces
       return w
-    toPorts words m = map (\w -> fromJust $ Map.lookup w m) words 
+
+    toPorts words m = map (\w -> fromJust $ M.lookup w m) words 
+
     toNode atom portNames m = 
       let ports = toPorts portNames m in
         case atom of
@@ -88,8 +85,8 @@ nodeP = do
             let [a] = ports
             in t a
 
-molP :: Parsec String (Int, Map.Map String Int) (Graph Int)
+molP :: Parsec String (Int, M.Map String Int) (Graph Int)
 molP = mkGraph <$> nodeP `sepBy` spaces
   
 parseMol :: String -> Either ParseError (Graph Int)
-parseMol = runParser molP (0, Map.empty) ""
+parseMol = runParser molP (0, M.empty) ""
