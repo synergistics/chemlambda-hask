@@ -2,10 +2,10 @@
 
 module Chemlambda.MolParser.Parser where
 
-import Data.Maybe
-import qualified Chemlambda.Core.Port as Port
-import qualified Chemlambda.Core.Atom as Atom
-import qualified Chemlambda.Core.Graph as Graph
+import Data.Maybe ( fromJust )
+import Chemlambda.Core.Port
+import Chemlambda.Core.Atom
+import Chemlambda.Core.Graph
 
 import Chemlambda.Core.Node
 import qualified Data.Map as Map
@@ -20,19 +20,19 @@ import Text.Parsec.String
 import Text.Parsec.Error
 
 
-atomP :: Parsec String (Int, Map.Map String Int) Atom.Atom
+atomP :: Parsec String (Int, Map.Map String Int) Atom
 atomP =
   let 
     as = map try 
-      [ (string "L")     >> return Atom.L
-      , (string "FOE")   >> return Atom.FOE
-      , (string "FO")    >> return Atom.FO
-      , (string "A")     >> return Atom.A
-      , (string "FI")    >> return Atom.FI
-      , (string "ARROW") >> return Atom.ARROW
-      , (string "FRIN")  >> return Atom.FRIN
-      , (string "FROUT") >> return Atom.FROUT
-      , (string "T")     >> return Atom.T
+      [ (string "L")     >> return L
+      , (string "FOE")   >> return FOE
+      , (string "FO")    >> return FO
+      , (string "A")     >> return A
+      , (string "FI")    >> return FI
+      , (string "ARROW") >> return ARROW
+      , (string "FRIN")  >> return FRIN
+      , (string "FROUT") >> return FROUT
+      , (string "T")     >> return T
       ]
   in choice as 
 
@@ -41,7 +41,7 @@ atomP =
 nodeP = do
   a <- between spaces (many1 space) atomP
   -- IAaMFG
-  words <- count (Atom.valence a) word 
+  words <- count (valence a) word 
   
   forM_ words $ \w -> do
     modifyState (\(i, m) -> if Map.notMember w m 
@@ -60,36 +60,36 @@ nodeP = do
     toNode atom portNames m = 
       let ports = toPorts portNames m in
         case atom of
-          Atom.L -> 
+          L -> 
             let [a,b,c] = ports
             in lam a b c
-          Atom.FO -> 
+          FO -> 
             let [a,b,c] = ports
             in fo a b c
-          Atom.FOE -> 
+          FOE -> 
             let [a,b,c] = ports
             in foe a b c
-          Atom.A -> 
+          A -> 
             let [a,b,c] = ports
             in app a b c
-          Atom.FI -> 
+          FI -> 
             let [a,b,c] = ports
             in fi a b c
-          Atom.ARROW -> 
+          ARROW -> 
             let [a,b] = ports
             in arrow a b
-          Atom.FRIN -> 
+          FRIN -> 
             let [a] = ports
             in frin a
-          Atom.FROUT -> 
+          FROUT -> 
             let [a] = ports
             in frout a
-          Atom.T -> 
+          T -> 
             let [a] = ports
             in t a
 
-molP :: Parsec String (Int, Map.Map String Int) (Graph.Graph [Node Int])
-molP = Graph.Graph <$> nodeP `sepBy` spaces
+molP :: Parsec String (Int, Map.Map String Int) (Graph Int)
+molP = mkGraph <$> nodeP `sepBy` spaces
   
-parseMol :: String -> Either ParseError (Graph.Graph [Node Int])
+parseMol :: String -> Either ParseError (Graph Int)
 parseMol = runParser molP (0, Map.empty) ""

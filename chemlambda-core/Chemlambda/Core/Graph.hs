@@ -3,7 +3,9 @@
 {-# LANGUAGE FlexibleInstances #-}
 
 module Chemlambda.Core.Graph
-  ( Graph(..) 
+  ( Graph
+  , mkGraph
+  , nodes
   , NodeSelector
   , li, ri, mi, lo, ro, mo
   , connections
@@ -21,33 +23,44 @@ import Chemlambda.Core.Atom
 import Chemlambda.Core.Node
 
 
--- | A Graph will in most cases be a list of nodes
+-- | A primitive wrapper used for making graphs of nodes. See below
+newtype Graph_ a = Graph_ { unGraph :: a } deriving ( Show, Eq )
+
+-- | A Graph holds a list of nodes
 -- This is my least favorite part of my implementation
 -- todo: Make the Graph type have more structure, maybe try a map eventually 
-newtype Graph a = Graph { nodes :: a } deriving ( Show, Eq )
+type Graph a = Graph_ [Node a]
 
-instance Functor Graph where
-  fmap f (Graph graph) = Graph $ f graph 
+-- | Make a 'Graph_' of nodes
+mkGraph :: [Node a] -> Graph a
+mkGraph = Graph_
 
-instance Applicative Graph where
-  pure a = Graph a
-  Graph f <*> graph = fmap f $ graph
+-- | Get the nodes from a Graph
+nodes :: Graph a -> [Node a] 
+nodes = unGraph
 
-instance Monad Graph where
-  return = pure
-  Graph graph >>= f = f graph
+instance Functor Graph_ where
+  fmap f = Graph_ . f . unGraph 
 
-instance Monoid (Graph [a]) where
-  mempty = Graph []
+instance Applicative Graph_ where
+  pure a = Graph_ a
+  funcGraph <*> graph = (fmap . unGraph) funcGraph $ graph
+
+instance Monad Graph_ where
+  return  = pure
+  g >>= f = f $ unGraph g
+
+instance Monoid (Graph_ [a]) where
+  mempty = Graph_ []
   mappend graphA graphB = (++) <$> graphA <*> graphB
   
 
 -- | @minus@ takes the left outer join on graphs
-minus :: Eq a => Graph [a] -> Graph [a] -> Graph [a]
+minus :: Eq a => Graph_ [a] -> Graph_ [a] -> Graph_ [a]
 g1 `minus` g2 = (\\) <$> g1 <*> g2
 
 -- | @plus@ takes the union of graphs
-plus :: Eq a => Graph [a] -> Graph [a] -> Graph [a]
+plus :: Eq a => Graph_ [a] -> Graph_ [a] -> Graph_ [a]
 plus = mappend
 
 -- | @plusNew@ adds 'Node's holding 'Port's with 'NewId's and adds them to a graph 
@@ -55,9 +68,9 @@ plus = mappend
 -- @ActualId a@s are reified by adding their inner port id without modification
 plusNew 
   :: (Enum a, Ord a)
-  => Graph [Node a] 
-  -> Graph [Node (NewId a)] 
-  -> Graph [Node a]
+  => Graph a 
+  -> Graph (NewId a) 
+  -> Graph a 
 plusNew graph graphNew = 
   let
     unusedIds = unusedPortIds graph
@@ -75,19 +88,14 @@ plusNew graph graphNew =
 
 
 -- | @connections@ returns the list of nodes connected to a node in a graph
-connections :: (Eq a) => Node a -> Graph [Node a] -> [Node a]
+connections :: (Eq a) => Node a -> Graph a -> [Node a]
 connections node graph 
   | elem node (nodes graph) = filter (connects node) (nodes graph)
   | otherwise               = []
 
 
--- | See, stupid.
-fromNode :: a -> Graph [a]
-fromNode node = return [node]
-
-
 -- | Possibly selects a node given a graph
-type NodeSelector a = Node a -> Graph [Node a] -> Maybe (Node a)
+type NodeSelector a = Node a -> Graph a -> Maybe (Node a)
 
 -- | Makes a NodeSelector for a node at a given port of another
 selectNodeAtPort 
@@ -124,7 +132,7 @@ mo = selectNodeAtPort moPort
 -- | Returns a list of unused portIds in a graph
 unusedPortIds
   :: forall a. (Enum a, Ord a)
-  => Graph [Node a]
+  => Graph a
   -> [a]
 unusedPortIds graph = 
   let
@@ -133,6 +141,6 @@ unusedPortIds graph =
     unused   = tail $ iterate succ (maximum inUse)
   in
     case graph of
-      Graph [] -> possible
+      Graph_ [] -> possible
       _        -> unused
 

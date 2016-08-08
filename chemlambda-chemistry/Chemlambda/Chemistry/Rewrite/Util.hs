@@ -1,3 +1,4 @@
+{-# LANGUAGE ViewPatterns #-}
 module Chemlambda.Chemistry.Rewrite.Util 
   ( runCombCycle
   , rewriteIO
@@ -12,7 +13,7 @@ import Chemlambda.Core.Pattern
 import Chemlambda.Chemistry.Reaction
 import Chemlambda.Chemistry.Enzymes
 
-runCombCycle :: (Enum a, Ord a) => Graph [Node a] -> Graph [Node a]
+runCombCycle :: (Enum a, Ord a) => Graph a -> Graph a
 runCombCycle graph = 
   let
     comb graph = 
@@ -21,15 +22,15 @@ runCombCycle graph =
         [] -> graph
         _  -> reactInGraph (head a) graph
 
-    go (Graph []) curr = go curr (comb curr)
+    go (nodes -> []) curr = go curr (comb curr)
     go prev curr = 
       if prev == curr
         then curr
         else go curr (comb curr)
   in
-    go (Graph []) graph
+    go (mkGraph []) graph
 
-rewriteIO :: (Graph [Node a] -> IO (Graph [Node a])) -> IO (Graph [Node a]) -> IO (Graph [Node a])
+rewriteIO :: (Graph a -> IO (Graph a)) -> IO (Graph a) -> IO (Graph a)
 rewriteIO rewrite ioG = do
   g <- ioG
   rewrite g

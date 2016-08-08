@@ -22,17 +22,17 @@ import Chemlambda.Core.Pattern
 
 
 data Enzyme a = Enzyme
-  { pattern :: Pattern [Node a] (Graph [Node a]) 
-  , move    :: Graph [Node a] -> Graph [Node (NewId a)] }
+  { pattern :: Pattern a (Graph a) 
+  , move    :: Graph a -> Graph (NewId a) }
 
 data ReactionSite a = ReactionSite 
-  { site     :: Graph [Node a]
-  , reaction :: Graph [Node a] -> Graph [Node (NewId a)] } 
+  { site     :: Graph a
+  , reaction :: Graph a -> Graph (NewId a) } 
 
-runReaction :: ReactionSite a -> Graph [Node (NewId a)]
+runReaction :: ReactionSite a -> Graph (NewId a)
 runReaction rsite = reaction rsite $ site rsite
 
-reactionSites :: Enzyme a -> Graph [Node a] -> [ReactionSite a] 
+reactionSites :: Enzyme a -> Graph a -> [ReactionSite a] 
 reactionSites enzyme graph =
   let matches = match (pattern enzyme) graph
   in map (\graph -> ReactionSite graph (move enzyme)) matches
@@ -42,22 +42,22 @@ sitesOverlap rsiteA rsiteB =
   let
     siteA        = site rsiteA
     siteB        = site rsiteB
-    Graph shared = intersect <$> siteA <*> siteB
+    sharedGraph  = intersect <$> siteA <*> siteB
   in
-    not $ null shared
+    (not . null . nodes) sharedGraph
 
 reactInGraph 
   :: (Enum a, Ord a) 
   => ReactionSite a 
-  -> Graph [Node a] 
-  -> Graph [Node a]
+  -> Graph a 
+  -> Graph a
 reactInGraph rsite graph =
   let
     withAdded   = graph `plusNew` runReaction rsite
     withRemoved = withAdded `minus` site rsite
   in withRemoved
 
-randomReactionSites :: Eq a => Graph [Node a] -> [Enzyme a] -> IO [ReactionSite a]
+randomReactionSites :: Eq a => Graph a -> [Enzyme a] -> IO [ReactionSite a]
 randomReactionSites graph enzymes =
   let
     rsites            = concatMap (\enzyme -> reactionSites enzyme graph) enzymes
@@ -84,7 +84,7 @@ randomReactionSites graph enzymes =
 
 
 
-deterministicReactionSites :: Eq a => Graph [Node a] -> [Enzyme a] -> [ReactionSite a]
+deterministicReactionSites :: Eq a => Graph a -> [Enzyme a] -> [ReactionSite a]
 deterministicReactionSites graph enzymes =
   let
     rsites = concatMap (\enzyme -> reactionSites enzyme graph) enzymes

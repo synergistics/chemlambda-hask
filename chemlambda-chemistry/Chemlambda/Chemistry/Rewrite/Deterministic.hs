@@ -11,7 +11,7 @@ import Chemlambda.Chemistry.Reaction
 import Chemlambda.Chemistry.Enzymes
 import Chemlambda.Chemistry.Rewrite.Util  
 
-detRewrite :: (Ord a, Enum a) => Graph [Node a] -> Graph [Node a] 
+detRewrite :: (Ord a, Enum a) => Graph a -> Graph a 
 detRewrite graph =
   let 
     result = 

@@ -4,17 +4,17 @@ import Chemlambda.Core.Node
 import Chemlambda.Core.Graph
 
 
-longIdentity = Graph . concat . take 100 . iterate (map succNode) $ nodes identity
+longIdentity = mkGraph . concat . take 100 . iterate (map succNode) $ nodes identity
   where
     succNode node = node { ports = map ((+ 15) <$>) $ ports node }
 
-identity = Graph
+identity = mkGraph
   [ lam 4 4 5
   , app 5 2 9
   , foe 9 10 11
   ]
 
-omega = Graph
+omega = mkGraph
   [ lam 0 1 2
   , fo  1 3 4
   , app 3 4 0
@@ -25,7 +25,7 @@ omega = Graph
   , frout 10
   ]
 
-y = Graph
+y = mkGraph
   [ fo  0 1 2
   , lam 3 4 5
   , fo  4 6 7
@@ -39,7 +39,7 @@ y = Graph
   , frout 99
   ]
 
-meh = Graph
+meh = mkGraph
   [ lam 0 1 2
   , t   1 
   , lam 2 0 3 
@@ -47,7 +47,7 @@ meh = Graph
   , lam 4 4 6
   ]
 
-skk = Graph
+skk = mkGraph
   [ foe 3 1 2
   , lam 5 4 3
   , lam 4 6 5
@@ -63,7 +63,7 @@ skk = Graph
   , fo  86 12 13
   ]
 
-quine = Graph
+quine = mkGraph
   [ lam 5 1 2
   , fi  1 7 6
   , app 2 3 4

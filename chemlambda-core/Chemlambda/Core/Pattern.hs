@@ -1,9 +1,7 @@
 module Chemlambda.Core.Pattern
   ( Pattern(..)
   , match
-  -- , nodesOnce
-  , anyNode, atomOf, nodeOf
-  , conn
+  , anyNode, atomOf, nodeOf, conn
   )
   where
 
@@ -16,7 +14,7 @@ import Chemlambda.Core.Graph
 
 
 -- | A @Pattern@ is a function that finds things that match a pattern in a graph
-newtype Pattern a b = Pattern (Graph a -> [b])
+newtype Pattern a b = Pattern {runPattern :: Graph a -> [b]} 
 
 instance Functor (Pattern a) where
   fmap f p = Pattern $ \graph -> map f $ match p graph
@@ -40,45 +38,30 @@ instance Monad (Pattern a) where
 
 -- | Matches a @Pattern@ on a Graph
 match :: Pattern a b -> Graph a -> [b]
-match (Pattern applyPattern) graph = applyPattern graph
-
-
--- Figure out how to handle this later
--- nodesOnce :: Eq a => [Graph [Node a]] -> [Graph [Node a]]
--- nodesOnce nodes =
---   let
---     nodeIn node graph = elem node (nodes graph) 
---   in
---     foldr
---       (\node acc ->
---         if nodeIn node acc
---           then acc
---           else node : acc)
---       []
---       nodes
+match pattern graph = runPattern pattern graph
 
 
 -- | @anyNode@ returns all the nodes in a graph
-anyNode :: Pattern [Node a] (Node a)
+anyNode :: Pattern a (Node a)
 anyNode = Pattern nodes
 
 -- | @atomOf@ matches nodes with a certain 'Atom' 
-atomOf :: Atom -> Pattern [Node a] (Node a)
+atomOf :: Atom -> Pattern a (Node a)
 atomOf a = Pattern $ filter (\node -> a == atom node) . nodes
 
 -- | @nodeOf@ matches equivalent nodes
-nodeOf :: Eq a => Node a -> Pattern [Node a] (Node a)
+nodeOf :: Eq a => Node a -> Pattern a (Node a)
 nodeOf n = Pattern $ filter (== n) . nodes
 
 -- | @conn@ matches on a connection between the nodes resulting from two patterns
 -- Each result is put into a graph
 conn
   :: Eq a
-  => Pattern [Node a] (Node a)
-  -> Pattern [Node a] (Node a)
+  => Pattern a (Node a)
+  -> Pattern a (Node a)
   -> [PortSel a]
   -> [PortSel a]
-  -> Pattern [Node a] (Graph [Node a])
+  -> Pattern a (Graph a)
 conn patternA patternB portsA portsB = Pattern $ \graph ->
   let
     portPairs = do
@@ -91,7 +74,7 @@ conn patternA patternB portsA portsB = Pattern $ \graph ->
 
     matchPairs = do
       node     <- match patternA graph
-      connNode <- match patternB $ Graph $ connections node graph
+      connNode <- match patternB $ mkGraph $ connections node graph
       return (node, connNode)
 
     connGroups = do
@@ -101,4 +84,4 @@ conn patternA patternB portsA portsB = Pattern $ \graph ->
     
     connectedPairs = filter (\(a,b,p,q) -> connectsAtPorts a b p q graph) connGroups
 
-  in map (\(a,b,p,q) -> Graph [a,b]) connectedPairs
+  in map (\(a,b,p,q) -> mkGraph [a,b]) connectedPairs

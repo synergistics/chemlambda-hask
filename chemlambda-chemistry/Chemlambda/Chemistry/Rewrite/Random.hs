@@ -11,7 +11,7 @@ import Chemlambda.Chemistry.Enzymes
 import Chemlambda.Chemistry.Rewrite.Util  
 
 
-randRewrite :: (Ord a, Enum a) => Graph [Node a] -> IO (Graph [Node a])
+randRewrite :: (Ord a, Enum a) => Graph a -> IO (Graph a)
 randRewrite graph =
   do
     sites <- randomReactionSites graph enzymeList    
