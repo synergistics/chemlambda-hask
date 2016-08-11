@@ -42,7 +42,7 @@ packages:
   - 'chemlambda-core'
   - 'chemlambda-chemistry'
   - 'chemlambda-sampledata'
-  - 'chemlambda-molparser'
+  - 'chemlambda-language'
   # - 'chemlambda-experimental'
 
    
