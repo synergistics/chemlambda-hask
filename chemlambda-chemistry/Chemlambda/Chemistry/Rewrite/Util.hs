@@ -1,4 +1,5 @@
 {-# LANGUAGE ViewPatterns #-}
+
 module Chemlambda.Chemistry.Rewrite.Util 
   ( runCombCycle
   , rewriteIO
@@ -30,6 +31,7 @@ runCombCycle graph =
   in
     go (mkGraph []) graph
 
+-- Maybe use a monad transformer to remove this unnecessary specificity. GraphT
 rewriteIO :: (Graph a -> IO (Graph a)) -> IO (Graph a) -> IO (Graph a)
 rewriteIO rewrite ioG = do
   g <- ioG

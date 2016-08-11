@@ -1,4 +1,4 @@
-# Revision history for chemlambda-molparser
+# Revision history for chemlambda-language
 
 ## 0.1.0  -- YYYY-mm-dd
 
