@@ -51,7 +51,7 @@ pruneFIPattern :: Eq a => Pattern a (Graph a)
 pruneFIPattern = conn (atomOf FI) (atomOf T) [moPort] [miPort]
 
 pruneLPattern :: Eq a => Pattern a (Graph a)
-pruneLPattern = conn (atomOf L) (atomOf T) [loPort] [miPort]
+pruneLPattern = conn (atomOf L) (atomOf T) [roPort] [miPort]
 
 pruneFObPattern :: Eq a => Pattern a (Graph a)
 pruneFObPattern = conn (atomOf FO) (atomOf T) [loPort] [miPort]
