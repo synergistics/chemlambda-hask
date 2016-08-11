@@ -24,12 +24,16 @@ import Chemlambda.Core.Node
 
 
 -- | A primitive wrapper used for making graphs of nodes. See below
-newtype Graph_ a = Graph_ { unGraph :: a } deriving ( Show, Eq )
+newtype Graph_ a = Graph_ { unGraph :: a } deriving ( Eq )
 
 -- | A Graph holds a list of nodes
 -- This is my least favorite part of my implementation
 -- todo: Make the Graph type have more structure, maybe try a map eventually 
 type Graph a = Graph_ [Node a]
+
+instance Show a => Show (Graph a) where
+  show g = "Graph\n" ++ (intercalate "\n" $ map (("  " ++) . show) (unGraph g))
+
 
 -- | Make a 'Graph_' of nodes
 mkGraph :: [Node a] -> Graph a

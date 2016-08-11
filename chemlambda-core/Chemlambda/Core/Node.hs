@@ -22,7 +22,11 @@ data Node a = Node
   deriving Eq
 
 instance Show a => Show (Node a) where
-  show (Node a ps) = "Node " ++ show a ++ " " ++ show ps
+  show (Node a ps) = 
+    let 
+      atomStr = show a 
+      atomLen = length atomStr 
+    in "Node " ++ show a ++ replicate (6 - atomLen) ' ' ++ "[ " ++ (intercalate ", " $ map show ps) ++ " ]"
 
 -- | Two @Node@s connect via a connection at one or more of their ports
 instance Eq a => Connectable (Node a) where
