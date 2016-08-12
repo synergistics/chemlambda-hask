@@ -19,6 +19,7 @@ cabal-version:       >=1.10
 library
   exposed-modules:
     Chemlambda.Language.MolParser.Parser
+    Chemlambda.Language.Chemeral.Definition
   -- other-modules:       
   -- other-extensions:    
   build-depends: 
