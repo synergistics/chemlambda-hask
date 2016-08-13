@@ -4,9 +4,9 @@ import Chemlambda.Core.Node
 import Chemlambda.Core.Graph
 
 
+succNode node = node { ports = map ((+ 15) <$>) $ ports node }
+
 longIdentity = mkGraph . concat . take 100 . iterate (map succNode) $ nodes identity
-  where
-    succNode node = node { ports = map ((+ 15) <$>) $ ports node }
 
 identity = mkGraph
   [ lam 4 4 5
@@ -25,6 +25,7 @@ omega = mkGraph
   , frout 10
   ]
 
+longY = mkGraph . concat . take 100 . iterate (map succNode) $ nodes y
 y = mkGraph
   [ fo  0 1 2
   , lam 3 4 5
