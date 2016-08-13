@@ -40,9 +40,9 @@ resolver: nightly-2016-07-14
 # will not be run. This is useful for tweaking upstream packages.
 packages:
   - 'chemlambda-core'
-  - 'chemlambda-chemistry'
-  - 'chemlambda-sampledata'
-  - 'chemlambda-language'
+  # - 'chemlambda-chemistry'
+  # - 'chemlambda-sampledata'
+  # - 'chemlambda-language'
   # - 'chemlambda-experimental'
 
    
