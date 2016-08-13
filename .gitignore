@@ -19,5 +19,5 @@ cabal.sandbox.config
 .stack-work/
 cabal.project.local
 
-Chemlambda
+^Chemlambda
 helpers

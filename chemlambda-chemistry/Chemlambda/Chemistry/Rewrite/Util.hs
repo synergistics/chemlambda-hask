@@ -5,6 +5,7 @@ module Chemlambda.Chemistry.Rewrite.Util
   , rewriteIO
   , rewriteIter
   , rewriteIterIO
+  , rewriteIterFull
   ) 
   where
 
@@ -39,3 +40,10 @@ rewriteIO rewrite ioG = do
 
 rewriteIter   rewrite times graph = iterate rewrite graph !! times
 rewriteIterIO rewrite times graph = iterate (rewriteIO rewrite) (return graph) !! times
+
+rewriteIterFull rewrite graph =
+  let
+    go (nodes -> []) curr = go curr (rewrite curr)
+    go prev curr = if prev == curr then curr else go curr (rewrite curr)
+  in
+    go (mkGraph []) graph

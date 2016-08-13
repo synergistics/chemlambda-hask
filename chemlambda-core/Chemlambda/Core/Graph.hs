@@ -146,5 +146,5 @@ unusedPortIds graph =
   in
     case graph of
       Graph_ [] -> possible
-      _        -> unused
+      _         -> unused
 

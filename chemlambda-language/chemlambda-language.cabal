@@ -37,8 +37,15 @@ executable molparse
   default-language: Haskell2010
   build-depends:
     base >=4.9 && <4.10,
+    chemlambda-core,
     chemlambda-chemistry,
     chemlambda-language
     
   hs-source-dirs: Chemlambda/Language/MolParser/IO
   main-is: Main.hs 
+
+  ghc-options:
+    -O2
+    -threaded
+    -fprof-auto
+    -prof

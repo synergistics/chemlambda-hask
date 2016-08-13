@@ -1,17 +1,22 @@
 # chemlambda-hask
 
 ## Description
-chemlambda-hask is an implementation of the [Chemlambda](https://chorasimilarity.github.io/chemlambda-gui/index.html) system.
-The original repo can be found [here](https://github.com/chorasimilarity/chemlambda-gui)
+chemlambda-hask is an implementation of the
+[Chemlambda](https://chorasimilarity.github.io/chemlambda-gui/index.html)
+graph rewriting system based on lambda calculus. Check out that link above to
+learn about Chemlambda itself.
 
-chemlambda-hask is a set of tools for working with the Chemlambda system. It is
-comprised of a core library upon which a graph rewrite system can be built, a
-chemistry implementing a small subset of what is possible with the core library,
-following the standard Chemlambda rules of graph rewrites, and a set of
-"language" modules for parsing .mol files (the barebones syntax for Chemlambda
-molecules). The project is still under constant development, so changes are to
-be expected along with new additions to what Chemlambda is and how it is
-implemented.  
+The original creator's, Marius Buliga, repository can be found
+[here](https://github.com/chorasimilarity/chemlambda-gui).
+
+chemlambda-hask is a set of tools for working with the Chemlambda system along
+with an implemetation of it. It is comprised of a core library upon which a
+graph rewrite system can be built, a chemistry implementing a small subset of
+what is possible with the core library, following the standard Chemlambda rules
+of graph rewrites, and a set of "language" modules for parsing .mol files (the
+barebones syntax for Chemlambda molecules). The project is still under constant
+development, so changes are to be expected along with new additions to what
+Chemlambda is and how it is implemented.  
 
 ## The modules
 ### chemlambda-core
@@ -45,7 +50,8 @@ is the conceputal bulk of it.
 - After testing, work on the mol parser
 
 ### Soon
-- Generalize the rewrite system by making a Rewritable class that Actors and Graphs and maybe Graphs of Actors are instances
+- Generalize the rewrite system by making a Rewritable class that Actors and
+  Graphs and maybe Graphs of Actors are instances
 
 ### Long Run
 - Make chemlambda-hask-repl executable subproject
