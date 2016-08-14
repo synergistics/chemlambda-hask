@@ -28,8 +28,8 @@ library
     
   build-depends:
     base >=4.9 && <4.10,
-    containers >=0.5 && <0.6
-    -- , vector
+    containers >=0.5 && <0.6,
+    vector
     -- , parallel
 
 
