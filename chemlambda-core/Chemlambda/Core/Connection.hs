@@ -11,20 +11,20 @@ import Chemlambda.Core.Atom
 data PortType = LO | LI | RO | RI | MO | MI
   deriving ( Eq, Show )
 
-data Direction = O | I 
-  deriving ( Eq, Show )
+data Direction = I | O 
+  deriving ( Eq, Ord, Show )
 
 type PortRef = (Int,PortType)
   
-data Node a = Node a
+data Node a = Node a 
   deriving ( Eq, Show )
 
-data Edge = Edge PortRef PortRef 
+data Edge a = Edge a a 
   deriving ( Eq, Show )
 
 data Graph = Graph 
   { graphNodes :: IntMap (Node Atom) 
-  , graphEdges :: IntMap Edge } 
+  , graphEdges :: IntMap (Edge PortRef) } 
   deriving ( Eq, Show )
 
 
@@ -43,13 +43,13 @@ direction p
 getNode :: Graph -> Int -> (Node Atom) 
 getNode = (!) . graphNodes 
 
-getEdge :: Graph -> Int -> Edge 
+getEdge :: Graph -> Int -> (Edge PortRef) 
 getEdge = (!) . graphEdges 
 
 portGroups :: [( n, [PortRef] )] -> [[PortRef]]
 portGroups entries = 
   let
-    portEntries = concatMap snd entries
+    portEntries = sortBy (\p q -> compare (fst p) (fst q)) $ concatMap snd entries
     groups      = groupBy (\ i j -> fst i == fst j) portEntries
   in
    groups
@@ -83,19 +83,29 @@ toGraph entries =
     indexedEntries = zipWith (\(n, es) i -> (i, es)) entries' [0..]
     indicesSharingEdge 
       = groupBy (\(_, pe1) (_, pe2) -> samePort pe1 pe2)
-      $ sortBy (\ (_, (a,_)) (_, (b,_)) -> compare a b)
+      $ sortBy (\ (_, (a,p)) (_, (b,q)) -> compare (a, direction p) (b, direction q))
       $ concatMap (\(i, ports) -> map (\p -> (i, p)) ports) indexedEntries
-    
-    nodes = IntMap.fromList $ zip [0..] $ map fst entries'
+    nodes 
+      = IntMap.fromList
+      $ zip [0..]
+      $ map fst entries'
 
     edges 
       = IntMap.fromList 
-      $ map (\[(i, (pi, pt1)), (j, (_, pt2))] -> (pi, Edge (i,pt1) (j,pt2))) indicesSharingEdge
+      $ map (\[ (i, (pi, pt1)), 
+                (j, (_ , pt2))  ] -> (pi, Edge (i,pt1) (j,pt2))) indicesSharingEdge
   in 
     Graph nodes edges 
 
 
+matchEdge :: Edge (Atom,PortType) -> Graph -> [(Int,Edge PortRef)]
+matchEdge (Edge (a,ptA) (b,ptB)) graph = 
+  filter 
+    (\(_, (Edge (i,ptI) (j,ptJ))) -> 
+      ptA == ptI && ptB == ptJ && Node a == getNode graph i && Node b == getNode graph j)
+    (IntMap.assocs $ graphEdges graph)
+
 test :: [(Node Atom, [PortRef])]
 test = 
-  [ (Node L, [ (1,MI), (1,LO), (3,RO) ])
-  , (Node A, [ (3,LI), (4,RI), (5,MO) ]) ]
+  [ (Node A, [ (3,LI), (4,RI), (5,MO) ]) 
+  , (Node L, [ (1,MI), (1,LO), (3,RO) ]) ]
