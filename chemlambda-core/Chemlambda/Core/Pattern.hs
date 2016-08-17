@@ -2,36 +2,36 @@
 module Chemlambda.Core.Pattern
   where
 
--- import qualified Data.IntMap as IntMap
--- import Chemlambda.Core.Atom
--- import Chemlambda.Core.Connection
+import qualified Data.IntMap as IntMap
+import Chemlambda.Core.Atom
+import Chemlambda.Core.Connection
 
 
--- data Pattern a where
---   AnyP      :: Pattern a
---   PortP     :: PortType -> Pattern PortType
---   OutPortP  :: Pattern PortType
---   InPortP   :: Pattern PortType
---   AtomP     :: Atom -> Pattern Atom
---   AtomPortP :: (Pattern Atom, Pattern PortType) -> Pattern (Atom,PortType)
---   EdgeP     :: Edge (Pattern (Atom,PortType)) -> Pattern (Edge (Atom,PortType))
+data Pattern a where
+  AnyP      :: Pattern a
+  PortP     :: PortType -> Pattern PortType
+  OutPortP  :: Pattern PortType
+  InPortP   :: Pattern PortType
+  AtomP     :: Atom -> Pattern Atom
+  AtomPortP :: (Pattern Atom, Pattern PortType) -> Pattern (Atom,PortType)
+  EdgeP     :: Edge (Pattern (Atom,PortType)) -> Pattern (Edge (Atom,PortType))
 
--- type EdgePattern = Pattern (Edge (Atom,PortType)) 
+type EdgePattern = Pattern (Edge (Atom,PortType)) 
 
--- runPattern :: Pattern a -> a -> Bool
--- runPattern AnyP                   = const True
--- runPattern (PortP p)              = (==) p
--- runPattern OutPortP               = (== O) . direction
--- runPattern InPortP                = (== I) . direction
--- runPattern (AtomP a)              = (==) a
--- runPattern (AtomPortP (a,p))      = \(a',p') -> runPattern a a' && runPattern p p'
--- runPattern (EdgeP (Edge apA apB)) = \(Edge apA' apB') -> runPattern apA apA' && runPattern apB apB'
+runPattern :: Pattern a -> a -> Bool
+runPattern AnyP                   = const True
+runPattern (PortP p)              = (==) p
+runPattern OutPortP               = (== O) . direction
+runPattern InPortP                = (== I) . direction
+runPattern (AtomP a)              = (==) a
+runPattern (AtomPortP (a,p))      = \(a',p') -> runPattern a a' && runPattern p p'
+runPattern (EdgeP (Edge apA apB)) = \(Edge apA' apB') -> runPattern apA apA' && runPattern apB apB'
 
--- matchEdge :: Pattern (Edge (Atom,PortType)) -> Graph -> [Edge (NodeRef)]
--- matchEdge ep g
---   = filter (\e -> runPattern ep (toAtomEdge e g))
---   $ IntMap.elems
---   $ graphEdges g
+matchEdge :: Pattern (Edge (Atom,PortType)) -> Graph -> [Edge (NodeRef Int)]
+matchEdge ep g
+  = filter (\e -> runPattern ep (e g))
+  $ IntMap.elems
+  $ graphEdges g
 
 -- mkEdgePattern :: Edge (Pattern Atom,Pattern PortType) -> EdgePattern
 -- mkEdgePattern (Edge (a1,pt1) (a2,pt2)) = EdgeP $ Edge (AtomPortP (a1, pt1)) (AtomPortP (a2, pt2))

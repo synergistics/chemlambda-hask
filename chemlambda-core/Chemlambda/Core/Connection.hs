@@ -37,6 +37,8 @@ instance Show a => Show (EdgeRef a) where
 instance Show a => Show (Node a) where
   show (Node a) = "Node " ++ show a
 
+instance Functor Edge where
+  fmap f (Edge a b) = Edge (f a) (f b)
 
 isOut :: PortType -> Bool
 isOut = flip elem [LO, RO, MO]
@@ -106,13 +108,13 @@ toGraph entries =
   in
     Graph nodes edges
 
--- -- toAtomPort :: (NodeRef Int) -> Graph -> (Atom,PortType)
--- -- toAtomPort (i,pt) g = (unNode $ getNode g i, pt)
+toAtomPort :: (NodeRef Int) -> Graph -> (NodeRef Atom)
+toAtomPort (NR i pt) g = NR (unNode $ fst $ getNode g i) pt
 
 -- -- toAtomEdge :: (Edge (NodeRef Int)) -> Graph -> Edge (Atom,PortType)
 -- -- toAtomEdge (Edge apA apB) g = Edge (toAtomPort apA g) (toAtomPort apB g)
 
 test :: [(Node Atom, [NodeRef Int])]
 test =
-  [ (Node A, [ (NR 3 LI), (NR 4 RI), (NR 5 MO) ])
-  , (Node L, [ (NR 1 MI), (NR 1 LO), (NR 3 RO) ]) ]
+  [ (Node L, [ (NR 1 MI), (NR 1 LO), (NR 3 RO) ])
+  , (Node A, [ (NR 3 LI), (NR 4 RI), (NR 5 MO) ]) ]
