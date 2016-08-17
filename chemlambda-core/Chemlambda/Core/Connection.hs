@@ -14,28 +14,28 @@ data PortType = LO | LI | RO | RI | MO | MI
 data Direction = I | O
   deriving ( Eq, Ord, Show )
 
-data NodeRef = NR { nRef :: Int, nPT :: PortType } deriving ( Eq )
-data EdgeRef = ER { eRef :: Int, ePT :: PortType } deriving ( Eq )
-
-instance Show NodeRef where
-  show (NR i pt) = show (i,pt)
- 
-instance Show EdgeRef where
-  show (ER i pt) = show (i,pt)
+data NodeRef a = NR { nRef :: a, nPT :: PortType } deriving ( Eq )
+data EdgeRef a = ER { eRef :: a, ePT :: PortType } deriving ( Eq )
 
 data Node a = Node { unNode :: a }
   deriving ( Eq )
-
-instance Show a => Show (Node a) where
-  show (Node a) = "Node " ++ show a
 
 data Edge a = Edge a a
   deriving ( Eq, Show )
 
 data Graph = Graph
-  { graphNodes :: IntMap (Node Atom,[EdgeRef])
-  , graphEdges :: IntMap (Edge NodeRef) }
+  { graphNodes :: IntMap (Node Atom,[EdgeRef Int])
+  , graphEdges :: IntMap (Edge (NodeRef Int)) }
   deriving ( Eq, Show )
+
+instance Show a => Show (NodeRef a) where
+  show (NR i pt) = show (i,pt)
+ 
+instance Show a => Show (EdgeRef a) where
+  show (ER i pt) = show (i,pt)
+
+instance Show a => Show (Node a) where
+  show (Node a) = "Node " ++ show a
 
 
 isOut :: PortType -> Bool
@@ -50,13 +50,13 @@ direction p
   | isIn  p = I
 
 
-getNode :: Graph -> Int -> (Node Atom,[EdgeRef]) 
+getNode :: Graph -> Int -> (Node Atom,[EdgeRef Int]) 
 getNode = (!) . graphNodes
 
-getEdge :: Graph -> Int -> (Edge NodeRef)
+getEdge :: Graph -> Int -> (Edge (NodeRef Int))
 getEdge = (!) . graphEdges
 
-portGroups :: [(n,[NodeRef])] -> [[NodeRef]]
+portGroups :: [(n,[(NodeRef Int)])] -> [[NodeRef Int]]
 portGroups entries =
   let
     portEntries = sortBy  (\ p q -> compare (nRef p) (nRef q)) $ concatMap snd entries
@@ -65,7 +65,7 @@ portGroups entries =
    groups
 
 
-addFrees :: [( Node Atom, [NodeRef] )] -> [( Node Atom, [NodeRef] )]
+addFrees :: [( Node Atom, [NodeRef Int] )] -> [( Node Atom, [NodeRef Int] )]
 addFrees entries =
   let
     portSingletons
@@ -82,10 +82,8 @@ addFrees entries =
   in
     frees ++ entries
 
--- samePort :: (Int,PortType) -> (Int,PortType) -> Bool
--- samePort i j = fst i == fst j
 
-toGraph :: [( Node Atom, [NodeRef] )] -> Graph
+toGraph :: [( Node Atom, [NodeRef Int] )] -> Graph
 toGraph entries =
   let
     entries' = addFrees entries
@@ -108,13 +106,13 @@ toGraph entries =
   in
     Graph nodes edges
 
--- -- toAtomPort :: NodeRef -> Graph -> (Atom,PortType)
+-- -- toAtomPort :: (NodeRef Int) -> Graph -> (Atom,PortType)
 -- -- toAtomPort (i,pt) g = (unNode $ getNode g i, pt)
 
--- -- toAtomEdge :: (Edge NodeRef) -> Graph -> Edge (Atom,PortType)
+-- -- toAtomEdge :: (Edge (NodeRef Int)) -> Graph -> Edge (Atom,PortType)
 -- -- toAtomEdge (Edge apA apB) g = Edge (toAtomPort apA g) (toAtomPort apB g)
 
-test :: [(Node Atom, [NodeRef])]
+test :: [(Node Atom, [NodeRef Int])]
 test =
   [ (Node A, [ (NR 3 LI), (NR 4 RI), (NR 5 MO) ])
   , (Node L, [ (NR 1 MI), (NR 1 LO), (NR 3 RO) ]) ]
