@@ -1,18 +1,32 @@
-{-# LANGUAGE GADTs #-}
-{-# LANGUAGE StandaloneDeriving #-}
-
-module Chemlambda.Core.Connection where
+module Chemlambda.Core.Connection 
+  where
   
 import Data.List
-import qualified Data.Vector as Vector
-import Data.Vector (Vector, (!))
+import qualified Data.IntMap as IntMap
+import Data.IntMap (IntMap, (!))
 
 import Chemlambda.Core.Atom
 
 
-data PortType = LO | LI | RO | RI | MO | MI deriving ( Eq, Show )
+data PortType = LO | LI | RO | RI | MO | MI
+  deriving ( Eq, Show )
 
-data Direction = O | I deriving ( Eq, Show )
+data Direction = O | I 
+  deriving ( Eq, Show )
+
+type PortRef = (Int,PortType)
+  
+data Node a = Node a
+  deriving ( Eq, Show )
+
+data Edge = Edge PortRef PortRef 
+  deriving ( Eq, Show )
+
+data Graph = Graph 
+  { graphNodes :: IntMap (Node Atom) 
+  , graphEdges :: IntMap Edge } 
+  deriving ( Eq, Show )
+
 
 isOut :: PortType -> Bool
 isOut = flip elem [LO, RO, MO]
@@ -26,38 +40,28 @@ direction p
   | isIn  p = I
 
 
-data Node a = Node a deriving ( Eq, Show )
-
-data Edge where
-  Edge :: (Show a, Num a) => a -> (a, PortType) -> (a, PortType) -> Edge
-deriving instance Show Edge 
-
-data Graph = Graph 
-  { graphNodes :: Vector (Node Atom) 
-  , graphEdges :: Vector Edge } 
-  deriving ( Show )
--- getNode :: Graph -> Int -> (Node Atom) 
+getNode :: Graph -> Int -> (Node Atom) 
 getNode = (!) . graphNodes 
 
--- getEdge :: Graph -> Int -> Edge 
+getEdge :: Graph -> Int -> Edge 
 getEdge = (!) . graphEdges 
 
-edgeGroups :: (Num a, Eq a) => [( n, [(a, PortType)] )] -> [[(a, PortType)]]
-edgeGroups nodeEntries = 
+portGroups :: [( n, [PortRef] )] -> [[PortRef]]
+portGroups entries = 
   let
-    edgeEntries = concatMap snd nodeEntries
-    groups      = groupBy (\i j -> fst i == fst j) edgeEntries
+    portEntries = concatMap snd entries
+    groups      = groupBy (\ i j -> fst i == fst j) portEntries
   in
    groups
 
 
-addFrees :: (Num a, Eq a) => [( Node Atom, [(a, PortType)] )] -> [( Node Atom, [(a, PortType)] )]
-addFrees nodeEntries = 
+addFrees :: [( Node Atom, [PortRef] )] -> [( Node Atom, [PortRef] )]
+addFrees entries = 
   let
     portSingletons
       = map head 
       $ filter ((== 1) . length) 
-      $ edgeGroups nodeEntries 
+      $ portGroups entries 
 
     frees = map 
       (\(i,pt) -> 
@@ -66,29 +70,32 @@ addFrees nodeEntries =
           O -> ( Node FROUT, [(i, MI)] ))
       portSingletons
   in
-    frees ++ nodeEntries
+    frees ++ entries
 
-samePort :: Eq a => (a, PortType) -> (a, PortType) -> Bool
+samePort :: PortRef -> PortRef -> Bool
 samePort i j = fst i == fst j
 
-toGraph :: (Num a, Eq a, Show a, Enum a) => [( Node Atom, [(a, PortType)] )] -> Graph -- Edge GADT makes constraints list long. 
-toGraph nodeEntries =
+toGraph :: [( Node Atom, [PortRef] )] -> Graph
+toGraph entries =
   let
-    nodeEntries'   = addFrees nodeEntries
+    entries' = addFrees entries
 
-    indexedEntries = zipWith (\(n, es) i -> (i, es)) nodeEntries' [0..]
+    indexedEntries = zipWith (\(n, es) i -> (i, es)) entries' [0..]
     indicesSharingEdge 
-      = groupBy (\(node1, pe1) (node2, pe2) -> samePort pe1 pe2)
+      = groupBy (\(_, pe1) (_, pe2) -> samePort pe1 pe2)
+      $ sortBy (\ (_, (a,_)) (_, (b,_)) -> compare a b)
       $ concatMap (\(i, ports) -> map (\p -> (i, p)) ports) indexedEntries
     
-    nodes = Vector.fromList $ map fst nodeEntries'
+    nodes = IntMap.fromList $ zip [0..] $ map fst entries'
 
     edges 
-      = Vector.fromList 
-      $ map (\[(i, (pi, pt1)), (j, (_, pt2))] -> Edge pi (i,pt1) (j,pt2)) indicesSharingEdge
+      = IntMap.fromList 
+      $ map (\[(i, (pi, pt1)), (j, (_, pt2))] -> (pi, Edge (i,pt1) (j,pt2))) indicesSharingEdge
   in 
     Graph nodes edges 
 
+
+test :: [(Node Atom, [PortRef])]
 test = 
-  [ (Node L, [(1,MI), (1,LO), (3,RO)])
-  , (Node A, [(3,LI)]) ]
+  [ (Node L, [ (1,MI), (1,LO), (3,RO) ])
+  , (Node A, [ (3,LI), (4,RI), (5,MO) ]) ]
