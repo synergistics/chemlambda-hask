@@ -26,7 +26,7 @@ data Edge a = Edge a a
 data Graph = Graph
   { graphNodes :: IntMap (Node Atom,[EdgeRef Int])
   , graphEdges :: IntMap (Edge (NodeRef Int)) }
-  deriving ( Eq, Show )
+  deriving ( Eq )
 
 
 instance Show a => Show (NodeRef a) where
@@ -37,6 +37,9 @@ instance Show a => Show (EdgeRef a) where
 
 instance Show a => Show (Node a) where
   show (Node a) = "Node " ++ show a
+
+instance Show Graph where
+  show graph = "Nodes\n" ++ IntMap.showTree (graphNodes graph) ++ "\nEdges\n" ++ IntMap.showTree (graphEdges graph)
 
 instance Functor Edge where
   fmap f (Edge a b) = Edge (f a) (f b)
@@ -115,8 +118,14 @@ toGraph entries =
 refWithAtom :: NodeRef Int -> Graph -> (NodeRef Atom)
 refWithAtom (NR i pt) g = NR (unNode $ fst $ getNode g i) pt
 
+refWithAtomAndNum :: NodeRef Int -> Graph -> (NodeRef (Int, Atom))
+refWithAtomAndNum (NR i pt) g = NR (i, unNode $ fst $ getNode g i) pt
+
 edgeWithAtoms :: (Edge (NodeRef Int)) -> Graph -> Edge (NodeRef Atom)
 edgeWithAtoms (Edge apA apB) g = Edge (refWithAtom apA g) (refWithAtom apB g)
+
+edgeWithAtomsAndNums :: (Edge (NodeRef Int)) -> Graph -> Edge (NodeRef (Int, Atom))
+edgeWithAtomsAndNums (Edge apA apB) g = Edge (refWithAtomAndNum apA g) (refWithAtomAndNum apB g)
 
 
 -- | Return the edge connected to node at a given port along with its index in the graph
