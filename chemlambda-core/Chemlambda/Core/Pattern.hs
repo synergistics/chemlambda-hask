@@ -13,118 +13,76 @@ data Pattern a where
   OutPortP  :: Pattern PortType
   InPortP   :: Pattern PortType
   AtomP     :: Atom -> Pattern Atom
-  AtomPortP :: (Pattern Atom, Pattern PortType) -> Pattern (Atom,PortType)
-  EdgeP     :: Edge (Pattern (Atom,PortType)) -> Pattern (Edge (Atom,PortType))
+  NodeRefP  :: Pattern Atom -> Pattern PortType -> Pattern (NodeRef Atom)
+  EdgeP     :: Pattern (NodeRef Atom) ->  Pattern (NodeRef Atom) -> Pattern (Edge (NodeRef Atom))
 
-type EdgePattern = Pattern (Edge (Atom,PortType)) 
+type EdgePattern = Pattern (Edge (NodeRef Atom)) 
 
 runPattern :: Pattern a -> a -> Bool
-runPattern AnyP                   = const True
-runPattern (PortP p)              = (==) p
-runPattern OutPortP               = (== O) . direction
-runPattern InPortP                = (== I) . direction
-runPattern (AtomP a)              = (==) a
-runPattern (AtomPortP (a,p))      = \(a',p') -> runPattern a a' && runPattern p p'
-runPattern (EdgeP (Edge apA apB)) = \(Edge apA' apB') -> runPattern apA apA' && runPattern apB apB'
+runPattern AnyP           = const True
+runPattern (PortP p)      = (==) p
+runPattern OutPortP       = (== O) . direction
+runPattern InPortP        = (== I) . direction
+runPattern (AtomP a)      = (==) a
+runPattern (NodeRefP a p) = \(NR a' p') -> runPattern a a' && runPattern p p'
+runPattern (EdgeP a b)    = \(Edge a' b') -> runPattern a a' && runPattern b b'
 
-matchEdge :: Pattern (Edge (Atom,PortType)) -> Graph -> [Edge (NodeRef Int)]
+matchEdge :: EdgePattern -> Graph -> [(Int, Edge (NodeRef Int))]
 matchEdge ep g
-  = filter (\e -> runPattern ep (e g))
-  $ IntMap.elems
+  = filter (\(i,e) -> runPattern ep (edgeWithAtoms e g))
+  $ IntMap.assocs
   $ graphEdges g
 
--- mkEdgePattern :: Edge (Pattern Atom,Pattern PortType) -> EdgePattern
--- mkEdgePattern (Edge (a1,pt1) (a2,pt2)) = EdgeP $ Edge (AtomPortP (a1, pt1)) (AtomPortP (a2, pt2))
 
--- betaPattern :: EdgePattern
--- betaPattern = mkEdgePattern $ Edge (AtomP A, PortP LI) (AtomP L, PortP RO) 
+betaPattern :: EdgePattern
+betaPattern = EdgeP (NodeRefP (AtomP A) (PortP LI)) (NodeRefP (AtomP L) (PortP RO))
 
--- combPattern :: EdgePattern
--- combPattern = mkEdgePattern $ Edge (AtomP ARROW, InPortP) (AnyP, OutPortP)
+betaMove :: Graph -> Graph
+betaMove graph =
+  let
+    (i, (Edge (NR aRef aP) (NR lRef lP))) = head $ matchEdge betaPattern graph
+    (aNode, aERs) = getNode graph aRef 
+    (lNode, lERs) = getNode graph lRef 
 
--- --   ( Pattern(..)
--- --   , match
--- --   , anyNode, atomOf, nodeOf, conn
--- --   )
--- --   where
+    Just (iA, (Edge arrow1MI xO)) = edgeAtPort (NR lRef MI) graph
+    Just (iB, (Edge yI lLO))      = edgeAtPort (NR lRef LO) graph
+    Just (iC, (Edge aRI zO))      = edgeAtPort (NR aRef RI) graph
+    Just (iD, (Edge wI arrow2MO)) = edgeAtPort (NR aRef MO) graph
 
--- -- import Control.Applicative
--- -- import Data.Maybe
--- -- import Chemlambda.Core.Port
--- -- import Chemlambda.Core.Atom
--- -- import Chemlambda.Core.Node
--- -- import Chemlambda.Core.Graph
+    arrow1MO = NR lRef MO
+    arrow2MI = NR aRef MI
 
+    arrow1ERs = foldr 
+      (\er ers ->
+        case ePT er of
+          RO -> ers
+          LO -> ER iB MO : ers
+          _  -> er : ers)
+        []
+        lERs
 
--- -- -- | A @Pattern@ is a function that finds things that match a pattern in a graph
--- -- newtype Pattern a b = Pattern {runPattern :: Graph a -> [b]}
+    arrow2ERs = foldr 
+      (\er ers ->
+        case ePT er of
+          LI -> ers
+          RI -> ER iC MI : ers
+          _  -> er : ers)
+        []
+        aERs
+    
+    edgeA = (iA, Edge arrow1MI xO)
+    edgeB = (iB, Edge wI arrow1MO)
+    edgeC = (iC, Edge arrow2MI zO) 
+    edgeD = (iD, Edge yI arrow2MO)
+    newEdges = IntMap.delete i $ foldl
+      (\im (i,e) -> IntMap.insert i e im)
+      (graphEdges graph) 
+      [edgeA,edgeB,edgeC,edgeD]
 
--- -- instance Functor (Pattern a) where
--- --   fmap f p = Pattern $ \graph -> map f $ match p graph
+    nodes = [(lRef, (Node ARROW, arrow1ERs)), (aRef, (Node ARROW, arrow2ERs))]
+    newNodes = foldl
+      (\im (i,n) -> IntMap.insert i n im)
+      (graphNodes graph)
+      nodes
 
--- -- instance Applicative (Pattern a) where
--- --   pure a  = Pattern $ const [a]
--- --   f <*> p = Pattern $ \graph ->
--- --     do
--- --       f' <- match f graph
--- --       p' <- match p graph
--- --       return $ f' p'
-
--- -- instance Alternative (Pattern a) where
--- --   empty = Pattern (pure [])
--- --   patternA <|> patternB = Pattern $ \graph -> match patternA graph ++ match patternB graph
-
--- -- instance Monad (Pattern a) where
--- --   return  = pure
--- --   p >>= f = Pattern $ \graph -> concatMap (\res -> match (f res) graph) $ match p graph
-
-
--- -- -- | Matches a @Pattern@ on a Graph
--- -- match :: Pattern a b -> Graph a -> [b]
--- -- match pattern graph = runPattern pattern graph
-
-
--- -- -- | @anyNode@ returns all the nodes in a graph
--- -- anyNode :: Pattern a (Node a)
--- -- anyNode = Pattern nodes
-
--- -- -- | @atomOf@ matches nodes with a certain 'Atom'
--- -- atomOf :: Atom -> Pattern a (Node a)
--- -- atomOf a = Pattern $ filter (\node -> a == atom node) . nodes
-
--- -- -- | @nodeOf@ matches equivalent nodes
--- -- nodeOf :: Eq a => Node a -> Pattern a (Node a)
--- -- nodeOf n = Pattern $ filter (== n) . nodes
-
--- -- -- | @conn@ matches on a connection between the nodes resulting from two patterns
--- -- -- Each result is put into a graph
--- -- conn
--- --   :: Eq a
--- --   => Pattern a (Node a)
--- --   -> Pattern a (Node a)
--- --   -> [PortSel a]
--- --   -> [PortSel a]
--- --   -> Pattern a (Graph a)
--- -- conn patternA patternB portsA portsB = Pattern $ \graph ->
--- --   let
--- --     portPairs = do
--- --       a <- portsA
--- --       b <- portsB
--- --       return (a,b)
-
--- --     connectsAtPorts nodeA nodeB portP portQ graph =
--- --       (connects <$> portP nodeA <*> portQ nodeB) == (Just True)
-
--- --     matchPairs = do
--- --       node     <- match patternA graph
--- --       connNode <- match patternB $ mkGraph $ connections node graph
--- --       return (node, connNode)
-
--- --     connGroups = do
--- --       (a,b) <- matchPairs
--- --       (p,q) <- portPairs
--- --       return (a,b,p,q)
-
--- --     connectedPairs = filter (\(a,b,p,q) -> connectsAtPorts a b p q graph) connGroups
-
--- --   in map (\(a,b,p,q) -> mkGraph [a,b]) connectedPairs
+  in Graph newNodes newEdges 

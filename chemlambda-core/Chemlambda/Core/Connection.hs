@@ -28,17 +28,19 @@ data Graph = Graph
   , graphEdges :: IntMap (Edge (NodeRef Int)) }
   deriving ( Eq, Show )
 
+
 instance Show a => Show (NodeRef a) where
-  show (NR i pt) = show (i,pt)
+  show (NR i pt) = "(NR " ++ show i ++ " " ++ show pt ++ ")"
  
 instance Show a => Show (EdgeRef a) where
-  show (ER i pt) = show (i,pt)
+  show (ER i pt) = "(ER " ++ show i ++ " " ++ show pt ++ ")"
 
 instance Show a => Show (Node a) where
   show (Node a) = "Node " ++ show a
 
 instance Functor Edge where
   fmap f (Edge a b) = Edge (f a) (f b)
+
 
 isOut :: PortType -> Bool
 isOut = flip elem [LO, RO, MO]
@@ -58,10 +60,10 @@ getNode = (!) . graphNodes
 getEdge :: Graph -> Int -> (Edge (NodeRef Int))
 getEdge = (!) . graphEdges
 
-portGroups :: [(n,[(NodeRef Int)])] -> [[NodeRef Int]]
-portGroups entries =
+groupByNode :: [NodeRef Int] -> [[NodeRef Int]]
+groupByNode entries =
   let
-    portEntries = sortBy  (\ p q -> compare (nRef p) (nRef q)) $ concatMap snd entries
+    portEntries = sortBy  (\ p q -> compare (nRef p) (nRef q)) entries 
     groups      = groupBy (\ p q -> nRef p == nRef q) portEntries
   in
    groups
@@ -73,7 +75,8 @@ addFrees entries =
     portSingletons
       = map head
       $ filter ((== 1) . length)
-      $ portGroups entries
+      $ groupByNode 
+      $ concatMap snd entries
 
     frees = map
       (\(NR i pt) ->
@@ -108,13 +111,45 @@ toGraph entries =
   in
     Graph nodes edges
 
-toAtomPort :: (NodeRef Int) -> Graph -> (NodeRef Atom)
-toAtomPort (NR i pt) g = NR (unNode $ fst $ getNode g i) pt
 
--- -- toAtomEdge :: (Edge (NodeRef Int)) -> Graph -> Edge (Atom,PortType)
--- -- toAtomEdge (Edge apA apB) g = Edge (toAtomPort apA g) (toAtomPort apB g)
+refWithAtom :: NodeRef Int -> Graph -> (NodeRef Atom)
+refWithAtom (NR i pt) g = NR (unNode $ fst $ getNode g i) pt
 
-test :: [(Node Atom, [NodeRef Int])]
-test =
-  [ (Node L, [ (NR 1 MI), (NR 1 LO), (NR 3 RO) ])
-  , (Node A, [ (NR 3 LI), (NR 4 RI), (NR 5 MO) ]) ]
+edgeWithAtoms :: (Edge (NodeRef Int)) -> Graph -> Edge (NodeRef Atom)
+edgeWithAtoms (Edge apA apB) g = Edge (refWithAtom apA g) (refWithAtom apB g)
+
+
+-- | Return the edge connected to node at a given port along with its index in the graph
+edgeAtPort :: NodeRef Int -> Graph -> Maybe (Int, Edge (NodeRef Int))
+edgeAtPort nr g =
+  let
+    (_, ers) = getNode g (nRef nr)
+    -- find the edgeRef with the correct port type
+    edgeRef  = fmap eRef $ find (\er -> ePT er == nPT nr) ers
+    edge     = fmap (getEdge g) edgeRef
+  in
+    (,) <$> edgeRef <*> edge
+
+-- | Return the node connected to another node at a given port along with its index in the graph
+nodeAtPort :: NodeRef Int -> Graph -> Maybe (Int, (Node Atom, [EdgeRef Int]))
+nodeAtPort nr g = 
+  let
+    getNodeRef (Edge a b) = 
+      if nPT nr == nPT a
+      then (nRef b, getNode g (nRef b))
+      else (nRef a, getNode g (nRef a))
+
+    edge = edgeAtPort nr g
+    node = fmap (getNodeRef . snd) edge
+  in
+    node
+
+lam :: Int -> Int -> Int -> (Node Atom, [NodeRef Int])
+lam a b c = (Node L, [ (NR a MI), (NR b LO), (NR c RO) ])
+
+app :: Int -> Int -> Int -> (Node Atom, [NodeRef Int])
+app a b c = (Node A, [ (NR a LI), (NR b RI), (NR c MO) ])
+
+test = toGraph  
+  [ lam 1 1 3 
+  , app 3 4 5 ]
