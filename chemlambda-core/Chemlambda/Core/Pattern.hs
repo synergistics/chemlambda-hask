@@ -3,6 +3,7 @@ module Chemlambda.Core.Pattern
   where
 
 import qualified Data.IntMap as IntMap
+import qualified Data.Maybe as Maybe
 import Chemlambda.Core.Atom
 import Chemlambda.Core.Connection
 
@@ -44,10 +45,10 @@ betaMove graph =
     (aNode, aERs) = getNode graph aRef 
     (lNode, lERs) = getNode graph lRef 
 
-    Just (iA, (Edge arrow1MI xO)) = edgeAtPort (NR lRef MI) graph
-    Just (iB, (Edge yI lLO))      = edgeAtPort (NR lRef LO) graph
-    Just (iC, (Edge aRI zO))      = edgeAtPort (NR aRef RI) graph
-    Just (iD, (Edge wI arrow2MO)) = edgeAtPort (NR aRef MO) graph
+    Just (iA, Edge arrow1MI xO) = edgeAtPort (NR lRef MI) graph
+    Just (iB, Edge yI lLO)      = edgeAtPort (NR lRef LO) graph
+    Just (iC, Edge aRI zO)      = edgeAtPort (NR aRef RI) graph
+    Just (iD, Edge wI arrow2MO) = edgeAtPort (NR aRef MO) graph
 
     arrow1MO = NR lRef MO
     arrow2MI = NR aRef MI
@@ -56,8 +57,8 @@ betaMove graph =
       (\er ers ->
         case ePT er of
           RO -> ers
-          LO -> ER iB MO : ers
-          _  -> er : ers)
+          LO -> ER (eRef er) MO : ers
+          MI -> Maybe.fromJust (edgeRefAtPort aERs RI) : ers)
         []
         lERs
 
@@ -65,15 +66,15 @@ betaMove graph =
       (\er ers ->
         case ePT er of
           LI -> ers
-          RI -> ER iC MI : ers
-          _  -> er : ers)
+          RI -> ER (eRef er) MI : ers
+          MO -> Maybe.fromJust (edgeRefAtPort lERs LO) : ers)
         []
         aERs
     
     edgeA = (iA, Edge arrow1MI xO)
-    edgeB = (iB, Edge wI arrow1MO)
+    edgeB = (iB, Edge yI arrow2MO)
     edgeC = (iC, Edge arrow2MI zO) 
-    edgeD = (iD, Edge yI arrow2MO)
+    edgeD = (iD, Edge wI arrow1MO)
     newEdges = IntMap.delete i $ foldl
       (\im (i,e) -> IntMap.insert i e im)
       (graphEdges graph) 

@@ -140,18 +140,22 @@ edgeAtPort nr g =
     (,) <$> edgeRef <*> edge
 
 -- | Return the node connected to another node at a given port along with its index in the graph
-nodeAtPort :: NodeRef Int -> Graph -> Maybe (Int, (Node Atom, [EdgeRef Int]))
-nodeAtPort nr g = 
-  let
-    getNodeRef (Edge a b) = 
-      if nPT nr == nPT a
-      then (nRef b, getNode g (nRef b))
-      else (nRef a, getNode g (nRef a))
+-- nodeAtPort :: NodeRef Int -> Graph -> Maybe (Int, (Node Atom, [EdgeRef Int]))
+-- nodeAtPort nr g = 
+--   let
+--     getNodeRef (Edge a b) = 
+--       if nPT nr == nPT a
+--       then (nRef b, getNode g (nRef b))
+--       else (nRef a, getNode g (nRef a))
 
-    edge = edgeAtPort nr g
-    node = fmap (getNodeRef . snd) edge
-  in
-    node
+--     edge = edgeAtPort nr g
+--     node = fmap (getNodeRef . snd) edge
+--   in
+--     node
+
+edgeRefAtPort :: [EdgeRef Int] -> PortType -> Maybe (EdgeRef Int)
+edgeRefAtPort refs pt = find (\(ER _ pt') -> pt == pt') refs
+
 
 lam :: Int -> Int -> Int -> (Node Atom, [NodeRef Int])
 lam a b c = (Node L, [ (NR a MI), (NR b LO), (NR c RO) ])
@@ -160,5 +164,5 @@ app :: Int -> Int -> Int -> (Node Atom, [NodeRef Int])
 app a b c = (Node A, [ (NR a LI), (NR b RI), (NR c MO) ])
 
 test = toGraph  
-  [ lam 1 1 3 
+  [ lam 1 2 3 
   , app 3 4 5 ]
