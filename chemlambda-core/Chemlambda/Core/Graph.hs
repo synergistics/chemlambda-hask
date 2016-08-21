@@ -1,150 +1,101 @@
-{-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE BangPatterns #-}
-{-# LANGUAGE FlexibleInstances #-}
-
 module Chemlambda.Core.Graph
-  ( Graph
-  , mkGraph
-  , nodes
-  , NodeSelector
-  , li, ri, mi, lo, ro, mo
-  , connections
-  , minus
-  , plus
-  , plusNew
-  , unusedPortIds
-  )
   where
+ 
+import qualified Data.List as List
+import qualified Data.Maybe as Maybe
+import qualified Data.IntMap as IntMap
+import Data.IntMap (IntMap, (!))
 
-import Data.List
-import Chemlambda.Core.Connectable
-import Chemlambda.Core.Port
 import Chemlambda.Core.Atom
-import Chemlambda.Core.Node
 
 
--- | A primitive wrapper used for making graphs of nodes. See below
-newtype Graph_ a = Graph_ { unGraph :: a } deriving ( Eq )
+data PortType = LO | LI | RO | RI | MO | MI
+  deriving ( Eq, Show )
 
--- | A Graph holds a list of nodes
--- This is my least favorite part of my implementation
--- todo: Make the Graph type have more structure, maybe try a map eventually 
-type Graph a = Graph_ [Node a]
+data Direction = I | O
+  deriving ( Eq, Ord, Show )
 
+data NodeRef a = NR { nRef :: a, nPT :: PortType } deriving ( Eq )
+
+data Node a b = Node { atom :: a, refs :: [ NodeRef b ] }
+  deriving ( Eq, Show )
+
+newtype Graph a = Graph { unGraph :: IntMap (Node a Int) }
+  deriving ( Eq )
+
+
+instance Show a => Show (NodeRef a) where
+  show (NR i pt) = "(NR " ++ show i ++ " " ++ show pt ++ ")"
+ 
 instance Show a => Show (Graph a) where
-  show g = "Graph\n" ++ (intercalate "\n" $ map (("  " ++) . show) (unGraph g))
+  show graph = "Nodes\n" ++ IntMap.showTree (unGraph graph)
 
 
--- | Make a 'Graph_' of nodes
-mkGraph :: [Node a] -> Graph a
-mkGraph = Graph_
+isOut :: PortType -> Bool
+isOut = flip elem [LO, RO, MO]
 
--- | Get the nodes from a Graph
-nodes :: Graph a -> [Node a] 
-nodes = unGraph
+isIn :: PortType -> Bool
+isIn = flip elem [LI, RI, MI]
 
-instance Functor Graph_ where
-  fmap f = Graph_ . f . unGraph 
+direction :: PortType -> Direction
+direction p
+  | isOut p = O
+  | isIn  p = I
 
-instance Applicative Graph_ where
-  pure a = Graph_ a
-  funcGraph <*> graph = (fmap . unGraph) funcGraph $ graph
 
-instance Monad Graph_ where
-  return  = pure
-  g >>= f = f $ unGraph g
+getNode :: Graph a -> Int -> (Node a Int) 
+getNode = (!) . unGraph
 
-instance Monoid (Graph_ [a]) where
-  mempty = Graph_ []
-  mappend graphA graphB = (++) <$> graphA <*> graphB
-  
-
--- | @minus@ takes the left outer join on graphs
-minus :: Eq a => Graph_ [a] -> Graph_ [a] -> Graph_ [a]
-g1 `minus` g2 = (\\) <$> g1 <*> g2
-
--- | @plus@ takes the union of graphs
-plus :: Eq a => Graph_ [a] -> Graph_ [a] -> Graph_ [a]
-plus = mappend
-
--- | @plusNew@ adds 'Node's holding 'Port's with 'NewId's and adds them to a graph 
--- @NewId Int@s are reified by replacing their port number with an unused port number in the starting graph
--- @ActualId a@s are reified by adding their inner port id without modification
-plusNew 
-  :: (Enum a, Ord a)
-  => Graph a 
-  -> Graph (NewId a) 
-  -> Graph a 
-plusNew graph graphNew = 
+addFrees :: [(Atom, [(PortType, Int)])] -> [(Atom, [(PortType, Int)])]
+addFrees entries =
   let
-    unusedIds = unusedPortIds graph
-    
-    reifyPort port = fmap go port
-      where
-        go (NewId a)    = unusedIds !! a
-        go (ActualId a) = a
-    
-    reifyNode node = node { ports = map reifyPort (ports node) }
+    allPorts = concatMap snd entries
 
-    graph' = map reifyNode <$> graphNew
-  in
-    graph `plus` graph'
+    withoutPair = 
+      filter 
+        (\(p,i) 
+          -> List.notElem i                               
+          $ map snd                                      
+          $ allPorts List.\\ [(p,i)])
+        allPorts
 
+    frees =
+      map
+        (\(p,i) -> case direction p of
+          O -> (FROUT, [(MI,i)])
+          I -> (FRIN,  [(MO,i)]))
+        withoutPair
+  in entries ++ frees
 
--- | @connections@ returns the list of nodes connected to a node in a graph
-connections :: (Eq a) => Node a -> Graph a -> [Node a]
-connections node graph 
-  | elem node (nodes graph) = filter (connects node) (nodes graph)
-  | otherwise               = []
-
-
--- | Possibly selects a node given a graph
-type NodeSelector a = Node a -> Graph a -> Maybe (Node a)
-
--- | Makes a NodeSelector for a node at a given port of another
-selectNodeAtPort 
-  :: Eq a 
-  => (Node a -> Maybe (Port a)) 
-  -> NodeSelector a 
-selectNodeAtPort portSel node graph = portSel node >>= findNode
-  where
-    findNode port = 
-      let conns = connections node graph
-      in find (\n -> any (connects port) $ ports n) conns 
-
-
--- === Node selectors
-li :: Eq a => NodeSelector a
-li = selectNodeAtPort liPort
-
-ri :: Eq a => NodeSelector a 
-ri = selectNodeAtPort riPort
-
-mi :: Eq a => NodeSelector a
-mi = selectNodeAtPort miPort
-
-lo :: Eq a => NodeSelector a
-lo = selectNodeAtPort loPort
-
-ro :: Eq a => NodeSelector a
-ro = selectNodeAtPort roPort
-
-mo :: Eq a => NodeSelector a
-mo = selectNodeAtPort moPort
-
-
--- | Returns a list of unused portIds in a graph
-unusedPortIds
-  :: forall a. (Enum a, Ord a)
-  => Graph a
-  -> [a]
-unusedPortIds graph = 
+toGraph :: [(Atom, [(PortType, Int)])] -> Graph Atom
+toGraph entries =
   let
-    possible = iterate succ (toEnum 0 :: a)
-    inUse    = concatMap (map portId . ports) $ nodes graph
-    unused   = tail $ iterate succ (maximum inUse)
-  in
-    case graph of
-      Graph_ [] -> possible
-      _        -> unused
+    entries' = addFrees entries
+    indexedAtoms = zip [0..] (map fst entries') 
+    indexedPorts = concat $ zipWith (\i ps -> map ((,) i) ps) [0..] (map snd entries')
 
+    toConnectedPorts (a,ps) = 
+      let
+        ps' = foldr 
+          (\(j,(p,i)) ps' -> 
+
+            if elem i $ map snd $ ps List.\\ [(p,i)] 
+              then let
+                matchingPort = (\(p,_) -> NR j p) <$> List.find (\(_,i') -> i' == i) ps
+                in Maybe.fromJust matchingPort : ps' 
+              else ps')
+
+          []
+          indexedPorts
+      in Node a ps'
+    
+    graph = Graph
+          $ IntMap.fromList
+          $ zip [0..]
+          $ map toConnectedPorts
+          $ entries'
+  in graph
+
+test = toGraph  
+  [ ( L, [ (MI,1), (LO,1), (RO,2) ] ) 
+  , ( A, [ (LI,2), (RI,3), (MO,4) ] ) ]

@@ -19,11 +19,10 @@ library
 
   exposed-modules:
     -- Chemlambda.Core.Node,
-    Chemlambda.Core.Pattern,
-    -- Chemlambda.Core.Graph,
+    -- Chemlambda.Core.Pattern,
+    Chemlambda.Core.Graph,
     -- Chemlambda.Core.Port,
-    Chemlambda.Core.Atom,
-    Chemlambda.Core.Connection
+    Chemlambda.Core.Atom
     -- Chemlambda.Core.Connectable
     
   build-depends:
