@@ -7,8 +7,8 @@ license:             BSD3
 license-file:        LICENSE
 author:              synergistics
 maintainer:          kingjak678@gmail.com
--- copyright:           
--- category:            
+-- copyright:
+-- category:
 build-type:          Simple
 extra-source-files:  ChangeLog.md, README.md
 cabal-version:       >=1.10
@@ -18,13 +18,13 @@ library
   default-language: Haskell2010
 
   exposed-modules:
-    -- Chemlambda.Core.Node,
-    -- Chemlambda.Core.Pattern,
+    Chemlambda.Core.Node,
+    Chemlambda.Core.Pattern,
     Chemlambda.Core.Graph,
-    -- Chemlambda.Core.Port,
+    Chemlambda.Core.Port,
     Chemlambda.Core.Atom
     -- Chemlambda.Core.Connectable
-    
+
   build-depends:
     base >=4.9 && <4.10,
     containers >=0.5 && <0.6,
@@ -39,7 +39,7 @@ test-suite test
   type: exitcode-stdio-1.0
 
   build-depends:
-    base, 
+    base,
     pretty-show,
     hspec,
     chemlambda-core
