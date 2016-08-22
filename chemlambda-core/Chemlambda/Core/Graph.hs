@@ -92,7 +92,18 @@ toGraph entries =
 
   in graph
 
-test = toGraph
-  [ ( L,  [ (MI,1), (LO,1), (RO,2) ] )
-  , ( A,  [ (LI,2), (RI,3), (MO,4) ] )
-  , ( FO, [ (MI,8), (LO,9), (RO,10) ] ) ]
+lam a b c = (L,  [ (MI,a), (LO,b), (RO,c) ])
+fo  a b c = (FO, [ (MI,a), (LO,b), (RO,c) ])
+app a b c = (A,  [ (LI,a), (RI,b), (MO,c) ])
+
+test
+  = toGraph
+  $ take 500
+  $ concat
+  $ iterate (map (\(a, [(x,xx), (y,yy), (z,zz)]) -> (a, [(x,xx+200),(y,yy+200),(z,zz+200)]))) 
+  [ lam 1 1 2 
+  , app 2 3 4 
+  , fo  8 9 10 
+  , lam 13 13 111
+  , app 111 43 44 ]
+
