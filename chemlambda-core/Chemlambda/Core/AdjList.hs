@@ -13,7 +13,7 @@ import Chemlambda.Core.Atom
 import Chemlambda.Core.Port
 
 
-type PortMap = Map PortType (Maybe Int)
+type PortMap = Map PortType Int 
 
 data AdjList a b = AdjList
   { entries :: IntMap (AdjEntry a b) }
@@ -66,21 +66,6 @@ addFrees entries =
 --   <$> refAtPort node pt
 
 
-mkPortMap :: [(PortType, Int)] -> PortMap
-mkPortMap ports =
-  let
-    justifiedPorts = map (\(p,i) -> (p, Just i)) ports
-    defaults =
-      [ (LI, Nothing)
-      , (RI, Nothing)
-      , (MI, Nothing)
-      , (LO, Nothing)
-      , (RO, Nothing)
-      , (MO, Nothing)
-      ] 
-    filled = List.unionBy (\p q -> fst p == fst q) justifiedPorts defaults
-  in Map.fromList filled
-
 toAdjList :: [(Atom, [(PortType, Int)])] -> AdjList Atom PortMap
 toAdjList portIdEntries =
   let
@@ -120,7 +105,7 @@ toAdjList portIdEntries =
       = AdjList
       $ IntMap.fromList
       $ zip [0..] 
-      $ map ((\(a,ps) -> AdjEntry a (mkPortMap ps)) . toAtomRefPorts)
+      $ map ((\(a,ps) -> AdjEntry a (Map.fromList ps)) . toAtomRefPorts)
       $ portIdEntries'
 
   in adjList 
@@ -138,4 +123,3 @@ test
   [ app 2 3 4 
   , lam 1 1 2 
   , fo  8 9 10 ]
-
