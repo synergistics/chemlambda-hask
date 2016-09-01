@@ -18,9 +18,9 @@ library
   default-language: Haskell2010
 
   exposed-modules:
-    Chemlambda.Core.Node,
-    Chemlambda.Core.Pattern,
-    Chemlambda.Core.Graph,
+    -- Chemlambda.Core.Node,
+    -- Chemlambda.Core.Pattern,
+    Chemlambda.Core.AdjList,
     Chemlambda.Core.Port,
     Chemlambda.Core.Atom
     -- Chemlambda.Core.Connectable

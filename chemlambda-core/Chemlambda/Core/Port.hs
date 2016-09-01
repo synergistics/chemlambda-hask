@@ -1,9 +1,8 @@
 module Chemlambda.Core.Port
   where
 
-
 data PortType = LO | LI | RO | RI | MO | MI
-  deriving ( Eq, Show )
+  deriving ( Eq, Ord, Show )
 
 data Direction = I | O
   deriving ( Eq, Ord, Show )
