@@ -65,7 +65,6 @@ addFrees entries =
 --   <$> nRef
 --   <$> refAtPort node pt
 
-
 toAdjList :: [(Atom, [(PortType, Int)])] -> AdjList Atom PortMap
 toAdjList portIdEntries =
   let
@@ -110,6 +109,9 @@ toAdjList portIdEntries =
 
   in adjList 
 
+
+idAtPort :: AdjEntry a PortMap -> PortType -> Maybe Int 
+idAtPort adjEntry port = Map.lookup port $ portMap adjEntry
 
 lam a b c = (L,  [ (MI,a), (LO,b), (RO,c) ])
 fo  a b c = (FO, [ (MI,a), (LO,b), (RO,c) ])
