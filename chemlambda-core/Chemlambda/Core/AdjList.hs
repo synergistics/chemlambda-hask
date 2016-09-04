@@ -1,3 +1,4 @@
+{-# LANGUAGE BangPatterns #-}
 module Chemlambda.Core.AdjList
   where
 
@@ -12,6 +13,8 @@ import Data.IntMap (IntMap, (!))
 import Chemlambda.Core.Atom
 import Chemlambda.Core.Port
 
+
+data Flagged a = Blocked a | Free a
 
 type PortMap = Map PortType Int 
 
@@ -68,13 +71,12 @@ addFrees entries =
 toAdjList :: [(Atom, [(PortType, Int)])] -> AdjList Atom PortMap
 toAdjList portIdEntries =
   let
-    portIdEntries' = addFrees portIdEntries
-    indexedAtoms   = zip [0..] $ map fst portIdEntries' -- give an index to each atom
+    indexedAtoms = zip [0..] $ map fst portIdEntries -- give an index to each atom
 
     portsWithAtomIndex :: [(Int, (PortType, Int))] -- give each port the index associated with its atom
     portsWithAtomIndex =
       let
-        ports = map snd portIdEntries' 
+        ports = map snd portIdEntries 
         givePortsIndex i ps = map ((,) i) ps
       in concat $ zipWith givePortsIndex [0..] ports
 
@@ -105,7 +107,7 @@ toAdjList portIdEntries =
       $ IntMap.fromList
       $ zip [0..] 
       $ map ((\(a,ps) -> AdjEntry a (Map.fromList ps)) . toAtomRefPorts)
-      $ portIdEntries'
+      $ portIdEntries
 
   in adjList 
 
@@ -117,11 +119,15 @@ lam a b c = (L,  [ (MI,a), (LO,b), (RO,c) ])
 fo  a b c = (FO, [ (MI,a), (LO,b), (RO,c) ])
 app a b c = (A,  [ (LI,a), (RI,b), (MO,c) ])
 
-test :: [(Atom, [(PortType, Int)])]
-test
-  = concat
-  $ take 1
+-- test :: [(Atom, [(PortType, Int)])]
+!test
+  = toAdjList
+  $ addFrees
+  $ concat
+  $ take 201
   $ iterate (map (\(a, [(x,xx), (y,yy), (z,zz)]) -> (a, [(x,xx+200),(y,yy+200),(z,zz+200)]))) 
   [ app 2 3 4 
   , lam 1 1 2 
-  , fo  8 9 10 ]
+  , fo  8 9 10
+  , app 11 12 13
+  , lam 14 15 16 ]

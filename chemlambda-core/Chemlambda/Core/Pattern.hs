@@ -1,3 +1,4 @@
+{-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE MultiWayIf #-}
 module Chemlambda.Core.Pattern
   where
@@ -17,27 +18,44 @@ import Chemlambda.Core.AdjList
 
 
 -- pattern :: AdjList Atom PortMap -> (Atom,PortType) -> (Atom,PortType) -> IntMap (AdjEntry Atom PortMap)
-pattern adjList (atom1,pt1) (atom2,pt2) =
-  IntMap.foldr
-    (\entry acc ->
-      let entryAtom = node entry in
-      if entryAtom == atom1
-        then
+pattern adjList (atom1,pt1) (atom2,pt2) =  
+  let
+    pairs 
+      = Maybe.fromJust
+      $ foldr 
+          (\entry acc ->
+            let entryAtom = node entry in
+            if entryAtom == atom1
+              then
+                let
+                  pair = do
+                    id2 <- idAtPort entry pt1 
+                    let otherEntry = getEntry adjList id2
+                    id1 <- idAtPort otherEntry pt2 
+
+                    return [(entry, otherEntry)]
+                in mappend pair acc
+
+              else acc)
+          (Just [])
+          (map snd $ IntMap.toList $ entries adjList)
+  in
+    -- pairs
+    map (\(entryA, entryB) ->
+      let
+        associateWithAtom :: Atom -> (PortType,Int) -> (PortType, Atom)
+        associateWithAtom atom port = fmap (const atom) port
+
+        portsA = Map.toList (portMap entryA)
+        portsB = Map.toList (portMap entryB)
+
+        toAssocs atom ports =
           let
-            pair = do
-              id2 <- idAtPort entry pt1 
-              let otherEntry = getEntry adjList id2
+            labels = map (associateWithAtom atom) ports
+            values = map (\(pt,i) -> getEntry adjList i) ports
+          in Map.fromList $ zip labels values
 
-              id1 <- idAtPort otherEntry pt2 
-
-              if getEntry adjList id1 == entry
-              then Just (entry, otherEntry)
-              else Nothing 
-          in pair : acc
-
-        else acc)
-    []
-    (entries adjList)
+      in toAssocs L (portsA ++ portsB)) pairs
 
 -- type PatternResult = Map (Atom,PortType) (Int, Node Atom Int)
 
