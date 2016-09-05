@@ -124,7 +124,7 @@ app a b c = (A,  [ (LI,a), (RI,b), (MO,c) ])
   = toAdjList
   $ addFrees
   $ concat
-  $ take 201
+  $ take 2000
   $ iterate (map (\(a, [(x,xx), (y,yy), (z,zz)]) -> (a, [(x,xx+200),(y,yy+200),(z,zz+200)]))) 
   [ app 2 3 4 
   , lam 1 1 2 
