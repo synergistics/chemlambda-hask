@@ -41,8 +41,8 @@ is the conceputal bulk of it.
 
 ## TODO
 ### Immediate
-- Get some decent tests!
-- After testing, work on the mol parser
+- Make a testing suite for each set of modules
+- Develop on the mol parser (Completed)
 
 ### Soon
 - Generalize the rewrite system by making a Rewritable class that Actors and Graphs and maybe Graphs of Actors are instances
@@ -50,3 +50,4 @@ is the conceputal bulk of it.
 ### Long Run
 - Make chemlambda-hask-repl executable subproject
 - Figure out what other subprojects would be helpful
+- Build a parallel version using CUDA C.
