@@ -43,6 +43,27 @@ left patterns), the vertices with which to replace left patterns
 replace them with right patterns. There are other files in this module, but this
 is the conceputal bulk of it.
 
+### chemlambda-langauge
+This component defines a parser for mol files and one for an enhanced mol syntax
+that is currently a work in progress. In Chemlambda, molecules are encoded in text
+files. Each line in a mol file represents an elementary molecule (a node) and its 
+incoming and outgoing connections to other nodes in a molecule. Here's an example:
+
+    L 1 1 2
+    L 3 3 4
+    A 2 4 5
+
+You can learn more about the molecule encoding using the links above.
+
+The MolParser interprets mol files, reading them into the chemlambda-hask evaluator
+so that they can be computed.
+
+There is some interest in developing an enhanced mol syntax that enables one to
+abstract over repetitive, or otherwise meaningful, parts of a molecule. Perhaps you
+have a section in a molecule that needs to be used in various places. This syntax
+would allow you to create molecule abstractions that can be parameterized to "hotswap"
+into multiple locations. Basically implementing molecule constructors. 
+
 
 ## TODO
 ### Immediate
