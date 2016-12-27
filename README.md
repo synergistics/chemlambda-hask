@@ -67,8 +67,8 @@ into multiple locations. Basically implementing molecule constructors.
 
 ## TODO
 ### Immediate
-- Get some decent tests!
-- After testing, work on the mol parser
+- Make a testing suite for each set of modules
+- Develop on the mol parser (Completed)
 
 ### Soon
 - Generalize the rewrite system by making a Rewritable class that Actors and
@@ -77,3 +77,4 @@ into multiple locations. Basically implementing molecule constructors.
 ### Long Run
 - Make chemlambda-hask-repl executable subproject
 - Figure out what other subprojects would be helpful
+- Build a parallel version using CUDA C.
